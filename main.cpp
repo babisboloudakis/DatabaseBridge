@@ -35,23 +35,48 @@ typedef struct ListNode {
 
 class ResultList {
 
-    ListNode * head;
-    ListNode * current;
+    ListNode * head; // First bucket
+    ListNode * current; // Last bucket
 
     public:
-
+    // Constructor for ResultList, also initializes listNode
     ResultList() {
-
+        this->head = new ListNode;
+        // Initialize listNode
+        this->head->offset = 0;
+        this->head->next = NULL;
+        memset(this->head->buffer, 0, 1024*1024);
+        this->current = this->head;
     }
 
+    // Method to insert result into the ResultList, also checks for overflow
+    // and handles it
     void * insertResult( Result * result ) {
         ListNode * bucket = this->current;
         if ( sizeof(result) > 1024*1024 - offset ) {
             ListNode * newBucket = new ListNode;
+            // Initialize new ListNode
+            newBucket->next = NULL;
+            newBucket->offset = 0;
+            memset(newBucket->buffer, 0, 1024*1024);
             bucket->next = newBucket;
             bucket = newBucket;
         }
-        
+        memcpy(bucket->buffer + offset, &result, sizeof(result));
+    }
+
+    void * printResult() {
+        Result currentResult;
+        ListNode * current = this->head;
+        cout << "Results are " << endl;
+        cout << "^^^^^^^^^^^ " << endl;
+        do {
+            int index = 0;
+            while ( index < current->offset ) {
+                memcpy(&currentResult, current->buffer + index, sizeof(Result));
+                cout << currentResult.key1 << " <-> " << currentResult.key2 << endl;
+            }
+        } while ( current != this->current )
     }
 }
 
@@ -166,10 +191,6 @@ result* RadixHashJoin(relation *relR, relation *relS) {
         cout << '\t' << i << " : " << St[i].payload << endl;
     }
 
-
-	
-	
-	
 
     // ----------------
     // |  SECOND PART  |
