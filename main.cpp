@@ -186,7 +186,7 @@ result* RadixHashJoin(relation *relR, relation *relS) {
                 if ( (last = bucketArray[bucket]) != 0){    //if there is a hash
                     if (bucketR[last-1].payload == bucketS[i].payload){     //if there is a match
                         //add to result
-                        cout << bucketR[last-1].key << " matches " << bucketS[last-1].key << endl;
+                        cout << bucketR[last-1].key << " matches " << bucketS[i].key << endl;
                         //...
                     }
                     //go to next
@@ -194,7 +194,7 @@ result* RadixHashJoin(relation *relR, relation *relS) {
                         last = chain[last-1];
                         if (bucketR[last-1].payload == bucketS[i].payload){
                             //add to result
-                            cout << bucketR[last-1].key << " matches " << bucketS[last-1].key << endl;
+                            cout << bucketR[last-1].key << " matches " << bucketS[i].key << endl;
                             //... 
                         }
                     }    
@@ -216,7 +216,7 @@ result* RadixHashJoin(relation *relR, relation *relS) {
                 if ( (last = bucketArray[bucket]) != 0){    //if there is a hash
                     if (bucketS[last-1].payload == bucketR[i].payload){     //if there is a match
                         //add to result
-                        cout << bucketR[last-1].key << " matches " << bucketS[last-1].key << endl;
+                        cout << bucketR[i].key << " matches " << bucketS[last-1].key << endl;
                         //... new result dtirjt sdijside 
                     }
                     //go to next
@@ -224,7 +224,7 @@ result* RadixHashJoin(relation *relR, relation *relS) {
                         last = chain[last-1];
                         if (bucketS[last-1].payload == bucketR[i].payload){
                             //add to result
-                            cout << bucketR[last-1].key << " matches " << bucketS[last-1].key << endl;
+                            cout << bucketR[i].key << " matches " << bucketS[last-1].key << endl;
                             //... 
                         }
                     }    
@@ -256,16 +256,22 @@ int main ( void ) {
     // SAMPLE DATA
     rel.tuples[0].key = 1;
     rel.tuples[0].payload = 1;
+
     rel.tuples[1].key = 2;
     rel.tuples[1].payload = 2;
+
     rel.tuples[2].key = 3;
     rel.tuples[2].payload = 3;
+
     rel.tuples[3].key = 4;
     rel.tuples[3].payload = 4;
+
     rel.tuples[4].key = 5;
     rel.tuples[4].payload = 8;
+
     rel.tuples[5].key = 6;
     rel.tuples[5].payload = 10;
+
     rel.tuples[6].key = 7;
     rel.tuples[6].payload = 12;
 
@@ -275,14 +281,18 @@ int main ( void ) {
     // SAMPLE DATA
     rel2.tuples[0].key = 1;
     rel2.tuples[0].payload = 1;
+
     rel2.tuples[1].key = 2;
     rel2.tuples[1].payload = 3;
+
     rel2.tuples[2].key = 3;
-    rel2.tuples[2].payload = 5;
+    rel2.tuples[2].payload = 4;
+
     rel2.tuples[3].key = 4;
-    rel2.tuples[3].payload = 7;
+    rel2.tuples[3].payload = 6;
+
     rel2.tuples[4].key = 5;
-    rel2.tuples[4].payload = 9;
+    rel2.tuples[4].payload = 8;
     
     RadixHashJoin(&rel,&rel2);
     // end of main
