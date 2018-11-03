@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdint>
+#include <cstring>
 
 using namespace std;
 
@@ -29,7 +30,7 @@ typedef struct Result {
 
 typedef struct ListNode {
     char buffer[1024*1024];
-    struct Listnode * next;
+    struct ListNode * next;
     int offset;
 } ListNode;
 
@@ -53,7 +54,7 @@ class ResultList {
     // and handles it
     void * insertResult( Result * result ) {
         ListNode * bucket = this->current;
-        if ( sizeof(result) > 1024*1024 - offset ) {
+        if ( sizeof(result) > 1024*1024 - bucket->offset ) {
             ListNode * newBucket = new ListNode;
             // Initialize new ListNode
             newBucket->next = NULL;
@@ -61,8 +62,12 @@ class ResultList {
             memset(newBucket->buffer, 0, 1024*1024);
             bucket->next = newBucket;
             bucket = newBucket;
+            this->current = bucket;
         }
-        memcpy(bucket->buffer + offset, &result, sizeof(result));
+        memcpy(bucket->buffer + bucket->offset, result, sizeof(*result));
+        bucket->offset += sizeof(result);
+        // cout << "Inserted result " << result->key1 << " " << result->key2 << endl;  
+
     }
 
     void * printResult() {
@@ -75,10 +80,11 @@ class ResultList {
             while ( index < current->offset ) {
                 memcpy(&currentResult, current->buffer + index, sizeof(Result));
                 cout << currentResult.key1 << " <-> " << currentResult.key2 << endl;
+                index +=  sizeof(Result);
             }
-        } while ( current != this->current )
+        } while ( current != this->current );
     }
-}
+};
 
 // Returns the value of the n less significant bits of a payload
 char HashFunction( int32_t payload, int n ) {
@@ -86,7 +92,10 @@ char HashFunction( int32_t payload, int n ) {
 }
 
 /** Radix Hash Join**/
-result* RadixHashJoin(relation *relR, relation *relS) {
+Result* RadixHashJoin(relation *relR, relation *relS) {
+    ResultList listR = ResultList();
+    
+    
     // ----------------
     // |  FIRST PART  |
     // ----------------
@@ -201,6 +210,7 @@ result* RadixHashJoin(relation *relR, relation *relS) {
 	int offsetR = 0;
 	int offsetS = 0;
 	
+
 	//for loop
 	for (temp = 0; temp < buckets; temp++){
 
@@ -237,7 +247,11 @@ result* RadixHashJoin(relation *relR, relation *relS) {
                     if (bucketR[last-1].payload == bucketS[i].payload){     //if there is a match
                         //add to result
                         cout << bucketR[last-1].key << " matches " << bucketS[i].key << endl;
-                        //...
+                        Result * result = new Result;
+                        result->key1 = bucketR[last-1].key;
+                        result->key2 = bucketS[i].key;
+                        listR.insertResult(result);
+                        delete result;
                     }
                     //go to next
                     while (chain[last-1] !=0){
@@ -245,7 +259,11 @@ result* RadixHashJoin(relation *relR, relation *relS) {
                         if (bucketR[last-1].payload == bucketS[i].payload){
                             //add to result
                             cout << bucketR[last-1].key << " matches " << bucketS[i].key << endl;
-                            //... 
+                            Result * result = new Result;
+                            result->key1 = bucketR[last-1].key;
+                            result->key2 = bucketS[i].key;
+                            listR.insertResult(result);
+                            delete result; 
                         }
                     }    
                 }	
@@ -267,7 +285,11 @@ result* RadixHashJoin(relation *relR, relation *relS) {
                     if (bucketS[last-1].payload == bucketR[i].payload){     //if there is a match
                         //add to result
                         cout << bucketR[i].key << " matches " << bucketS[last-1].key << endl;
-                        //... new result dtirjt sdijside 
+                        Result * result = new Result;
+                        result->key1 = bucketR[i].key;
+                        result->key2 = bucketS[last-1].key;
+                        listR.insertResult(result);
+                        delete result;
                     }
                     //go to next
                     while (chain[last-1] !=0){
@@ -275,7 +297,11 @@ result* RadixHashJoin(relation *relR, relation *relS) {
                         if (bucketS[last-1].payload == bucketR[i].payload){
                             //add to result
                             cout << bucketR[i].key << " matches " << bucketS[last-1].key << endl;
-                            //... 
+                            Result * result = new Result;
+                            result->key1 = bucketR[i].key;
+                            result->key2 = bucketS[last-1].key;
+                            listR.insertResult(result);
+                            delete result;
                         }
                     }    
                 }	
@@ -294,6 +320,8 @@ result* RadixHashJoin(relation *relR, relation *relS) {
     // ----------------
     // |  THIRD PART  |
     // ----------------
+
+    listR.printResult();
 }
 
 
