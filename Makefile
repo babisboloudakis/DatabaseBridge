@@ -4,3 +4,5 @@ default: main.o
 main.o: main.cpp
 	g++ -c main.cpp -std=c++11
 
+run: default
+	./main

@@ -70,7 +70,7 @@ result* RadixHashJoin(relation *relR, relation *relS) {
         uint32_t bucket = HashFunction(payload,n);
         // increase appropriate hist counter
         histR[bucket]++;
-    }bucket[i]
+    }
 	for ( int i = 0; i < Sn; i++ ) {
         int32_t payload = S[i].payload;
         uint32_t bucket = HashFunction(payload,n);
@@ -118,7 +118,7 @@ result* RadixHashJoin(relation *relR, relation *relS) {
         uint32_t bucket = HashFunction(payload,n); // bucket for that payload
 		Rt[ psumR[bucket] ].key = R[i].key;
 		Rt[ psumR[bucket]++ ].payload = R[i].payload; 
-    }payload
+    }
 	for ( int i = 0; i < Sn; i++ ) {
         int32_t payload = S[i].payload; // payload to write
         uint32_t bucket = HashFunction(payload,n); // bucket for that payload
@@ -147,62 +147,98 @@ result* RadixHashJoin(relation *relR, relation *relS) {
     // ----------------
 
 	//initialiaze index and offsets
-	int temp = 0;
+	temp = 0;
 	int offsetR = 0;
 	int offsetS = 0;
 	
 	//for loop
-	//initialize bucket arrays	
-	package  * bucketR = new package[histR[temp]];
-	package  * bucketS = new package[histS[temp]];
-	
-	for (int i = 0; i < histR[temp]; i++){
-		bucketR[i] = Rt[i + offsetR];	
-	}
-	for (int i = 0; i < histS[temp]; i++){
-		bucketS[i] = St[i + offsetS];	
-	}
-	
-	//initialize bucketArray
-	uint32_t* bucketArary = new uint32_t[buckets*2];
-	for (int i = 0; i < buckets*2; i++){
-		bucketArray[i] = 0;	
-	}	
+	for (temp = 0; temp < buckets; temp++){
 
-	//select smallest bucket
-	if (histR[temp] <= histS[temp]){
-		uint32_t * chain = new uint32_t[histR[temp]];
-		for (int i = 0; i < histR[temp]; i++){
-        	uint32_t bucket = HashFunction(bucketR[i].payload, n + 1); // bucket for that payload
-			uint32_t last = bucketArray[bucket];			
-			bucketArray[bucket] = i + 1;	
-			chain[i] = last;		
-		}
-		//go to other bucket		
-		for (int i = 0; i < histS[temp]; i++){
-			uint32_t bucket = HashFunction(bucketS[i].payload, n + 1); // bucket for that payload
-				
-		}			
-	}
-	else{
-		uint32_t * chain = new uint32_t[histS[temp]];
-		for (int i = 0; i < histS[temp]; i++){
-        	uint32_t bucket = HashFunction(bucketS[i].payload, n + 1); // bucket for that payload
-			uint32_t last = bucketArray[bucket];			
-			bucketArray[bucket] = i + 1;	
-			chain[i] = last;		
-		}
-			
-	}
-	
-	
-	
-	
-	
-	 	
+        //initialize bucket arrays	
+        package  * bucketR = new package[histR[temp]];
+        package  * bucketS = new package[histS[temp]];
 
-	
+        for (int i = 0; i < histR[temp]; i++){
+            bucketR[i] = Rt[i + offsetR];	
+        }
+        for (int i = 0; i < histS[temp]; i++){
+            bucketS[i] = St[i + offsetS];	
+        }
 
+        //initialize bucketArray
+        uint32_t* bucketArray = new uint32_t[buckets*2];
+        for (int i = 0; i < buckets*2; i++){
+            bucketArray[i] = 0;	
+        }	
+        uint32_t last;
+        //select smallest bucket
+        if (histR[temp] <= histS[temp]){
+            uint32_t * chain = new uint32_t[histR[temp]];
+            for (int i = 0; i < histR[temp]; i++){
+                uint32_t bucket = HashFunction(bucketR[i].payload, n + 1); // bucket for that payload
+                last = bucketArray[bucket];			
+                bucketArray[bucket] = i + 1;	
+                chain[i] = last;		
+            }
+            //go to other bucket		
+            for (int i = 0; i < histS[temp]; i++){
+                uint32_t bucket = HashFunction(bucketS[i].payload, n + 1); // bucket for that payload
+                if ( (last = bucketArray[bucket]) != 0){    //if there is a hash
+                    if (bucketR[last-1].payload == bucketS[i].payload){     //if there is a match
+                        //add to result
+                        cout << bucketR[last-1].key << " matches " << bucketS[last-1].key << endl;
+                        //...
+                    }
+                    //go to next
+                    while (chain[last-1] !=0){
+                        last = chain[last-1];
+                        if (bucketR[last-1].payload == bucketS[i].payload){
+                            //add to result
+                            cout << bucketR[last-1].key << " matches " << bucketS[last-1].key << endl;
+                            //... 
+                        }
+                    }    
+                }	
+            }			
+            delete chain;
+        }
+        else{
+            uint32_t * chain = new uint32_t[histS[temp]];
+            for (int i = 0; i < histS[temp]; i++){
+                uint32_t bucket = HashFunction(bucketS[i].payload, n + 1); // bucket for that payload
+                uint32_t last = bucketArray[bucket];			
+                bucketArray[bucket] = i + 1;	
+                chain[i] = last;		
+            }
+            //go to other bucket		
+            for (int i = 0; i < histR[temp]; i++){
+                uint32_t bucket = HashFunction(bucketR[i].payload, n + 1); // bucket for that payload
+                if ( (last = bucketArray[bucket]) != 0){    //if there is a hash
+                    if (bucketS[last-1].payload == bucketR[i].payload){     //if there is a match
+                        //add to result
+                        cout << bucketR[last-1].key << " matches " << bucketS[last-1].key << endl;
+                        //... new result dtirjt sdijside 
+                    }
+                    //go to next
+                    while (chain[last-1] !=0){
+                        last = chain[last-1];
+                        if (bucketS[last-1].payload == bucketR[i].payload){
+                            //add to result
+                            cout << bucketR[last-1].key << " matches " << bucketS[last-1].key << endl;
+                            //... 
+                        }
+                    }    
+                }	
+            }
+            delete chain;        
+        }
+        offsetR = offsetR + histR[temp];
+        offsetS = offsetS + histS[temp];
+        delete bucketArray;
+        delete bucketS;
+        delete bucketR;
+    }
+	
 
 	
     // ----------------
@@ -219,35 +255,35 @@ int main ( void ) {
     rel.tuples = new package[7];
     // SAMPLE DATA
     rel.tuples[0].key = 1;
-    rel.tuples[0].payload = 0;
+    rel.tuples[0].payload = 1;
     rel.tuples[1].key = 2;
-    rel.tuples[1].payload = 3;
+    rel.tuples[1].payload = 2;
     rel.tuples[2].key = 3;
-    rel.tuples[2].payload = 1;
+    rel.tuples[2].payload = 3;
     rel.tuples[3].key = 4;
-    rel.tuples[3].payload = 1;
+    rel.tuples[3].payload = 4;
     rel.tuples[4].key = 5;
-    rel.tuples[4].payload = 0;
+    rel.tuples[4].payload = 8;
     rel.tuples[5].key = 6;
-    rel.tuples[5].payload = 1;
+    rel.tuples[5].payload = 10;
     rel.tuples[6].key = 7;
-    rel.tuples[6].payload = 1;
+    rel.tuples[6].payload = 12;
 
 	relation rel2;
     rel2.num_tuples = 5;
     rel2.tuples = new package[5];
     // SAMPLE DATA
     rel2.tuples[0].key = 1;
-    rel2.tuples[0].payload = 0;
+    rel2.tuples[0].payload = 1;
     rel2.tuples[1].key = 2;
-    rel2.tuples[1].payload = 0;
+    rel2.tuples[1].payload = 3;
     rel2.tuples[2].key = 3;
-    rel2.tuples[2].payload = 1;
+    rel2.tuples[2].payload = 5;
     rel2.tuples[3].key = 4;
-    rel2.tuples[3].payload = 1;
+    rel2.tuples[3].payload = 7;
     rel2.tuples[4].key = 5;
-    rel2.tuples[4].payload = 3;
-
+    rel2.tuples[4].payload = 9;
+    
     RadixHashJoin(&rel,&rel2);
     // end of main
     return 0;
