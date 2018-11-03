@@ -92,8 +92,8 @@ char HashFunction( int32_t payload, int n ) {
 }
 
 /** Radix Hash Join**/
-Result* RadixHashJoin(relation *relR, relation *relS) {
-    ResultList listR = ResultList();
+ResultList * RadixHashJoin(relation *relR, relation *relS) {
+    ResultList * listR = new ResultList();
     
     
     // ----------------
@@ -250,7 +250,7 @@ Result* RadixHashJoin(relation *relR, relation *relS) {
                         Result * result = new Result;
                         result->key1 = bucketR[last-1].key;
                         result->key2 = bucketS[i].key;
-                        listR.insertResult(result);
+                        listR->insertResult(result);
                         delete result;
                     }
                     //go to next
@@ -262,7 +262,7 @@ Result* RadixHashJoin(relation *relR, relation *relS) {
                             Result * result = new Result;
                             result->key1 = bucketR[last-1].key;
                             result->key2 = bucketS[i].key;
-                            listR.insertResult(result);
+                            listR->insertResult(result);
                             delete result; 
                         }
                     }    
@@ -288,7 +288,7 @@ Result* RadixHashJoin(relation *relR, relation *relS) {
                         Result * result = new Result;
                         result->key1 = bucketR[i].key;
                         result->key2 = bucketS[last-1].key;
-                        listR.insertResult(result);
+                        listR->insertResult(result);
                         delete result;
                     }
                     //go to next
@@ -300,7 +300,7 @@ Result* RadixHashJoin(relation *relR, relation *relS) {
                             Result * result = new Result;
                             result->key1 = bucketR[i].key;
                             result->key2 = bucketS[last-1].key;
-                            listR.insertResult(result);
+                            listR->insertResult(result);
                             delete result;
                         }
                     }    
@@ -321,7 +321,8 @@ Result* RadixHashJoin(relation *relR, relation *relS) {
     // |  THIRD PART  |
     // ----------------
 
-    listR.printResult();
+    // listR.printResult();
+    return listR;
 }
 
 
@@ -372,7 +373,7 @@ int main ( void ) {
     rel2.tuples[4].key = 5;
     rel2.tuples[4].payload = 8;
     
-    RadixHashJoin(&rel,&rel2);
+    (RadixHashJoin(&rel,&rel2))->printResult();
     // end of main
     return 0;
 }
