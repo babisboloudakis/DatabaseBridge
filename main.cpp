@@ -22,9 +22,38 @@ typedef struct relation {
 * Type definition for a relation.
 * It consists of an array of tuples and a size of the relation.
 */
-typedef struct result {
+typedef struct Result {
+    int32_t key1;
+    int32_t key2;
+} Result; 
 
-} result; 
+typedef struct ListNode {
+    char buffer[1024*1024];
+    struct Listnode * next;
+    int offset;
+} ListNode;
+
+class ResultList {
+
+    ListNode * head;
+    ListNode * current;
+
+    public:
+
+    ResultList() {
+
+    }
+
+    void * insertResult( Result * result ) {
+        ListNode * bucket = this->current;
+        if ( sizeof(result) > 1024*1024 - offset ) {
+            ListNode * newBucket = new ListNode;
+            bucket->next = newBucket;
+            bucket = newBucket;
+        }
+        
+    }
+}
 
 // Returns the value of the n less significant bits of a payload
 char HashFunction( int32_t payload, int n ) {
