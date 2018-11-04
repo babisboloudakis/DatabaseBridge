@@ -2,6 +2,8 @@
 #include <cstdint>
 #include <cstring>
 
+#define BUFFERSIZE 1048576 // 1 MB
+
 using namespace std;
 
 /** Type definition for a tuple */
@@ -20,20 +22,26 @@ typedef struct relation {
 } relation;
 
 /**
-* Type definition for a relation.
-* It consists of an array of tuples and a size of the relation.
+* Type definition for a result.
+* It consists of a tuple of 2 keys for each rowId.
 */
 typedef struct Result {
     int32_t key1;
     int32_t key2;
 } Result; 
 
+// Struct for bucket, stores a buffer of 1MB, a pointer
+// to the next bucket as well as the offset for free space
+// inside the bucket
 typedef struct ListNode {
-    char buffer[1024*1024];
+    char buffer[BUFFERSIZE];
     struct ListNode * next;
     int offset;
 } ListNode;
 
+// ResultList is used in order to store the results of bridge
+// into buckets. It tracks the first and last bucket. It also
+// includes a couple methos related to the resultList
 class ResultList {
 
     ListNode * head; // First bucket
@@ -46,7 +54,7 @@ class ResultList {
         // Initialize listNode
         this->head->offset = 0;
         this->head->next = NULL;
-        memset(this->head->buffer, 0, 1024*1024);
+        memset(this->head->buffer, 0, BUFFERSIZE);
         this->current = this->head;
     }
 
@@ -54,12 +62,12 @@ class ResultList {
     // and handles it
     void * insertResult( Result * result ) {
         ListNode * bucket = this->current;
-        if ( sizeof(result) > 1024*1024 - bucket->offset ) {
+        if ( sizeof(result) > BUFFERSIZE - bucket->offset ) {
             ListNode * newBucket = new ListNode;
             // Initialize new ListNode
             newBucket->next = NULL;
             newBucket->offset = 0;
-            memset(newBucket->buffer, 0, 1024*1024);
+            memset(newBucket->buffer, 0, BUFFERSIZE);
             bucket->next = newBucket;
             bucket = newBucket;
             this->current = bucket;
@@ -82,9 +90,12 @@ class ResultList {
                 cout << currentResult.key1 << " <-> " << currentResult.key2 << endl;
                 index +=  sizeof(Result);
             }
-        } while ( current != this->current );
+            current = current->next;
+        } while ( current != NULL );
     }
-};
+
+}; // End of resultList class
+
 
 // Returns the value of the n less significant bits of a payload
 char HashFunction( int32_t payload, int n ) {
@@ -93,13 +104,12 @@ char HashFunction( int32_t payload, int n ) {
 
 /** Radix Hash Join**/
 ResultList * RadixHashJoin(relation *relR, relation *relS) {
+
     ResultList * listR = new ResultList();
-    
-    
+
     // ----------------
     // |  FIRST PART  |
     // ----------------
-
     // Get the size of each relation
     int Rn = relR->num_tuples;
     int Sn = relS->num_tuples;
@@ -200,17 +210,14 @@ ResultList * RadixHashJoin(relation *relR, relation *relS) {
         cout << '\t' << i << " : " << St[i].payload << endl;
     }
 
-
     // ----------------
     // |  SECOND PART  |
     // ----------------
-
 	//initialiaze index and offsets
 	temp = 0;
 	int offsetR = 0;
 	int offsetS = 0;
 	
-
 	//for loop
 	for (temp = 0; temp < buckets; temp++){
 
@@ -315,20 +322,19 @@ ResultList * RadixHashJoin(relation *relR, relation *relS) {
         delete bucketR;
     }
 	
-
-	
     // ----------------
     // |  THIRD PART  |
     // ----------------
-
     // listR.printResult();
     return listR;
+
 }
 
 
 
 int main ( void ) {
-
+    // Main function created in order to test
+    // our bridge implementation
     relation rel;
     rel.num_tuples = 7;
     rel.tuples = new package[7];
@@ -376,4 +382,5 @@ int main ( void ) {
     (RadixHashJoin(&rel,&rel2))->printResult();
     // end of main
     return 0;
+
 }
