@@ -359,48 +359,59 @@ int main ( void ) {
     // Main function created in order to test
     // our bridge implementation
     relation rel;
-    rel.num_tuples = 7;
-    rel.tuples = new package[7];
-    // SAMPLE DATA
-    rel.tuples[0].key = 1;
-    rel.tuples[0].payload = 1;
-
-    rel.tuples[1].key = 2;
-    rel.tuples[1].payload = 2;
-
-    rel.tuples[2].key = 3;
-    rel.tuples[2].payload = 3;
-
-    rel.tuples[3].key = 4;
-    rel.tuples[3].payload = 4;
-
-    rel.tuples[4].key = 5;
-    rel.tuples[4].payload = 8;
-
-    rel.tuples[5].key = 6;
-    rel.tuples[5].payload = 10;
-
-    rel.tuples[6].key = 7;
-    rel.tuples[6].payload = 12;
-
-	relation rel2;
+    rel.num_tuples = 10;
+    rel.tuples = new package[10];
+    
+    relation rel2;
     rel2.num_tuples = 5;
     rel2.tuples = new package[5];
     // SAMPLE DATA
+    rel.tuples[0].key = 1;
+    rel.tuples[0].payload = 60;
+
+    rel.tuples[1].key = 2;
+    rel.tuples[1].payload = 47;
+
+    rel.tuples[2].key = 3;
+    rel.tuples[2].payload = 30;
+
+    rel.tuples[3].key = 4;
+    rel.tuples[3].payload = 41;
+
+    rel.tuples[4].key = 5;
+    rel.tuples[4].payload = 88;
+
+    rel.tuples[5].key = 6;
+    rel.tuples[5].payload = 100;
+
+    rel.tuples[6].key = 7;
+    rel.tuples[6].payload = 254;
+
+    rel.tuples[7].key = 8;
+    rel.tuples[7].payload = 1254;
+
+    rel.tuples[8].key = 9;
+    rel.tuples[8].payload = 124;
+
+    rel.tuples[9].key = 10;
+    rel.tuples[9].payload = 125;
+
+	
+    // SAMPLE DATA
     rel2.tuples[0].key = 1;
-    rel2.tuples[0].payload = 1;
+    rel2.tuples[0].payload = 14;
 
     rel2.tuples[1].key = 2;
-    rel2.tuples[1].payload = 3;
+    rel2.tuples[1].payload = 30;
 
     rel2.tuples[2].key = 3;
-    rel2.tuples[2].payload = 4;
+    rel2.tuples[2].payload = 41;
 
     rel2.tuples[3].key = 4;
-    rel2.tuples[3].payload = 6;
+    rel2.tuples[3].payload = 154;
 
     rel2.tuples[4].key = 5;
-    rel2.tuples[4].payload = 8;
+    rel2.tuples[4].payload = 89;
     
     ResultList* list = RadixHashJoin(&rel,&rel2);
     list->printResult();
