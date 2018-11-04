@@ -6,3 +6,5 @@ main.o: main.cpp
 
 run: default
 	./main
+clean:
+	rm -f *.o ./main
