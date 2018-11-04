@@ -2,7 +2,12 @@
  *Ανάπτυξη Λογισμικού Για Πληροφοριακά Συστήματα,
  Χειμερινό Εξάμηνο 2018 – 2019*
 
-Οδηγίες εκτέλεσης για demonstration
+- [Εκτέλεση]()
+- [Hash Functions](https://github.com/babisboloudakis/DatabaseBridge#hash-functions)
+- [Αποτελέσματα Ζεύξης](https://github.com/babisboloudakis/DatabaseBridge#hash-functions)
+- [Tests]()
+
+# Οδηγίες εκτέλεσης για demonstration
 ```
 $ make
 $./main
