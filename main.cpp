@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <cstring>
 
-#define BUFFERSIZE 1048576 // 1 MB
+#define BUFFERSIZE 1048576 // 1024 * 1024 = 1 MB
 #define PRIME 7 // prime number used in HashFunction2
 
 using namespace std;
@@ -165,17 +165,6 @@ ResultList * RadixHashJoin(relation *relR, relation *relS) {
         histS[bucket]++;
     }
 
-    // print histogram for debug purposes
-    cout << " .:: Histogram R ::." << endl;
-    for ( int i = 0; i < buckets; i++ ) {
-        cout << '\t' << i << " : " << histR[i] << endl;
-    }
-	// print histogram for debug purposes
-    cout << " .:: Histogram S ::." << endl;
-    for ( int i = 0; i < buckets; i++ ) {
-        cout << '\t' << i << " : " << histS[i] << endl;
-    }
-
     // Create Psum Array
     unsigned int * psumR = new unsigned int[buckets];
 	unsigned int * psumS = new unsigned int[buckets];
@@ -188,15 +177,6 @@ ResultList * RadixHashJoin(relation *relR, relation *relS) {
         }
         psumR[i] = psumR[i-1] + histR[i-1];
 		psumS[i] = psumS[i-1] + histS[i-1];
-    }
-    // print Psum for debug purposes
-    cout << " .:: PsumR ::." << endl;
-    for ( int i = 0; i < buckets; i++ ) {
-        cout << '\t' << i << " : " << psumR[i] << endl;
-    }
-	cout << " .:: PsumS ::." << endl;
-    for ( int i = 0; i < buckets; i++ ) {
-        cout << '\t' << i << " : " << psumS[i] << endl;
     }
 
     // Using Psum Array, create the transformed relationships
@@ -211,17 +191,6 @@ ResultList * RadixHashJoin(relation *relR, relation *relS) {
         uint32_t bucket = HashFunction1(payload,n); // bucket for that payload
 		St[ psumS[bucket] ].key = S[i].key;
 		St[ psumS[bucket]++ ].payload = S[i].payload; 
-    }
-	
-	// print Rt for debug purposes
-    cout << " .:: Rt ::." << endl;
-    for ( int i = 0; i < Rn; i++ ) {
-        cout << '\t' << i << " : " << Rt[i].payload << endl;
-    }
-	// print Rt for debug purposes
-    cout << " .:: St ::." << endl;
-    for ( int i = 0; i < Sn; i++ ) {
-        cout << '\t' << i << " : " << St[i].payload << endl;
     }
 
     // ----------------
@@ -266,7 +235,6 @@ ResultList * RadixHashJoin(relation *relR, relation *relS) {
                 if ( (last = bucketArray[bucket]) != 0){    //if there is a hash
                     if (bucketR[last-1].payload == bucketS[i].payload){     //if there is a match
                         //add to result
-                        cout << bucketR[last-1].key << " matches " << bucketS[i].key << endl;
                         Result * result = new Result;
                         result->key1 = bucketR[last-1].key;
                         result->key2 = bucketS[i].key;
@@ -278,7 +246,6 @@ ResultList * RadixHashJoin(relation *relR, relation *relS) {
                         last = chain[last-1];
                         if (bucketR[last-1].payload == bucketS[i].payload){
                             //add to result
-                            cout << bucketR[last-1].key << " matches " << bucketS[i].key << endl;
                             Result * result = new Result;
                             result->key1 = bucketR[last-1].key;
                             result->key2 = bucketS[i].key;
@@ -304,7 +271,6 @@ ResultList * RadixHashJoin(relation *relR, relation *relS) {
                 if ( (last = bucketArray[bucket]) != 0){    //if there is a hash
                     if (bucketS[last-1].payload == bucketR[i].payload){     //if there is a match
                         //add to result
-                        cout << bucketR[i].key << " matches " << bucketS[last-1].key << endl;
                         Result * result = new Result;
                         result->key1 = bucketR[i].key;
                         result->key2 = bucketS[last-1].key;
@@ -316,7 +282,6 @@ ResultList * RadixHashJoin(relation *relR, relation *relS) {
                         last = chain[last-1];
                         if (bucketS[last-1].payload == bucketR[i].payload){
                             //add to result
-                            cout << bucketR[i].key << " matches " << bucketS[last-1].key << endl;
                             Result * result = new Result;
                             result->key1 = bucketR[i].key;
                             result->key2 = bucketS[last-1].key;
@@ -338,7 +303,6 @@ ResultList * RadixHashJoin(relation *relR, relation *relS) {
     // ----------------
     // |  THIRD PART  |
     // ----------------
-    // listR.printResult();
 
     // Delete of histograms and psums
     delete histR;
@@ -350,76 +314,47 @@ ResultList * RadixHashJoin(relation *relR, relation *relS) {
     delete St;
 
     return listR;
-
 }
 
 
-
+// Main function created in order to test
+// our bridge implementation
 int main ( void ) {
-    // Main function created in order to test
-    // our bridge implementation
+    // Allocation of two tables R and S
     relation rel;
-    rel.num_tuples = 10;
-    rel.tuples = new package[10];
-    
+    rel.num_tuples = 4;
+    rel.tuples = new package[rel.num_tuples];
     relation rel2;
-    rel2.num_tuples = 5;
-    rel2.tuples = new package[5];
-    // SAMPLE DATA
+    rel2.num_tuples = 3;
+    rel2.tuples = new package[rel2.num_tuples];
+
+    // Sample data same with the one in given requirements
+    // Table R
     rel.tuples[0].key = 1;
-    rel.tuples[0].payload = 60;
-
+    rel.tuples[0].payload = 1;
     rel.tuples[1].key = 2;
-    rel.tuples[1].payload = 47;
-
+    rel.tuples[1].payload = 2;
     rel.tuples[2].key = 3;
-    rel.tuples[2].payload = 30;
-
+    rel.tuples[2].payload = 3;
     rel.tuples[3].key = 4;
-    rel.tuples[3].payload = 41;
-
-    rel.tuples[4].key = 5;
-    rel.tuples[4].payload = 88;
-
-    rel.tuples[5].key = 6;
-    rel.tuples[5].payload = 100;
-
-    rel.tuples[6].key = 7;
-    rel.tuples[6].payload = 254;
-
-    rel.tuples[7].key = 8;
-    rel.tuples[7].payload = 1254;
-
-    rel.tuples[8].key = 9;
-    rel.tuples[8].payload = 124;
-
-    rel.tuples[9].key = 10;
-    rel.tuples[9].payload = 125;
-
-	
-    // SAMPLE DATA
+    rel.tuples[3].payload = 4;
+    // Table S
     rel2.tuples[0].key = 1;
-    rel2.tuples[0].payload = 14;
-
+    rel2.tuples[0].payload = 1;
     rel2.tuples[1].key = 2;
-    rel2.tuples[1].payload = 30;
-
+    rel2.tuples[1].payload = 1;
     rel2.tuples[2].key = 3;
-    rel2.tuples[2].payload = 41;
+    rel2.tuples[2].payload = 3;
 
-    rel2.tuples[3].key = 4;
-    rel2.tuples[3].payload = 154;
-
-    rel2.tuples[4].key = 5;
-    rel2.tuples[4].payload = 89;
-    
+    // Call of RHJ with the two relations
     ResultList* list = RadixHashJoin(&rel,&rel2);
     list->printResult();
+
+    // Delete for Result list which is alllocated inside RadixHashJoin
+    // Delete of Table R and Table S
     delete list;
     delete rel.tuples;
     delete rel2.tuples;
 
-
     return 0;
-
 }
