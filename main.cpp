@@ -3,6 +3,7 @@
 #include <cstring>
 
 #define BUFFERSIZE 1048576 // 1 MB
+#define PRIME 7 // prime number used in HashFunction2
 
 using namespace std;
 
@@ -98,8 +99,14 @@ class ResultList {
 
 
 // Returns the value of the n less significant bits of a payload
-char HashFunction( int32_t payload, int n ) {
+int HashFunction1( int32_t payload, int n ) {
     return payload & ((1 << n) - 1);
+}
+
+// We modulo the payload with a prime number
+// so that we get better divisions
+int HashFunction2( int32_t payload ) {
+    return payload % PRIME; 
 }
 
 /** Radix Hash Join**/
