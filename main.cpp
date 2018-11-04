@@ -58,6 +58,15 @@ class ResultList {
         memset(this->head->buffer, 0, BUFFERSIZE);
         this->current = this->head;
     }
+    // Destructor for ResultList
+    ~ResultList() {
+        ListNode * current;
+        while ( this->head != NULL ) {
+            current = this->head;
+            this->head = current->next;
+            delete current;
+        }
+    }
 
     // Method to insert result into the ResultList, also checks for overflow
     // and handles it
@@ -396,6 +405,9 @@ int main ( void ) {
     ResultList* list = RadixHashJoin(&rel,&rel2);
     list->printResult();
     delete list;
+    delete rel.tuples;
+    delete rel2.tuples;
+
 
     return 0;
 
