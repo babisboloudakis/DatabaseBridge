@@ -2,12 +2,15 @@
  *Ανάπτυξη Λογισμικού Για Πληροφοριακά Συστήματα,
  Χειμερινό Εξάμηνο 2018 – 2019*
 
-- [Εκτέλεση]()
+- [Εκτέλεση](https://github.com/babisboloudakis/DatabaseBridge#%CE%BF%CE%B4%CE%B7%CE%B3%CE%AF%CE%B5%CF%82-%CE%B5%CE%BA%CF%84%CE%AD%CE%BB%CE%B5%CF%83%CE%B7%CF%82-%CE%B3%CE%B9%CE%B1-demonstration)
 - [Hash Functions](https://github.com/babisboloudakis/DatabaseBridge#hash-functions)
 - [Αποτελέσματα Ζεύξης](https://github.com/babisboloudakis/DatabaseBridge#hash-functions)
-- [Tests]()
+- [Tests](https://github.com/babisboloudakis/DatabaseBridge#tests)
 
-# Οδηγίες εκτέλεσης για demonstration
+# Οδηγίες εκτέλεσης
+Παρόλο που δεν έχει νόημα ακόμα η εκτέλεση του προγράμματος, έχουμε φτιάξει μια δικιά μας 
+main function στην οποία δημιουργούμε δύο δικές μας σχέσης R, S με hardcoded τρόπο
+για να δείξουμε ότι το πρόγραμμα εκτελείτε σωστά.
 ```
 $ make
 $./main
