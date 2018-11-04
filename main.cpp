@@ -75,8 +75,6 @@ class ResultList {
         }
         memcpy(bucket->buffer + bucket->offset, result, sizeof(*result));
         bucket->offset += sizeof(result);
-        // cout << "Inserted result " << result->key1 << " " << result->key2 << endl;  
-
     }
 
     void * printResult() {
@@ -332,6 +330,16 @@ ResultList * RadixHashJoin(relation *relR, relation *relS) {
     // |  THIRD PART  |
     // ----------------
     // listR.printResult();
+
+    // Delete of histograms and psums
+    delete histR;
+    delete histS;
+    delete psumR;
+    delete psumS;
+    // Delete of final arrays
+    delete Rt;
+    delete St;
+
     return listR;
 
 }
@@ -385,8 +393,10 @@ int main ( void ) {
     rel2.tuples[4].key = 5;
     rel2.tuples[4].payload = 8;
     
-    (RadixHashJoin(&rel,&rel))->printResult();
-    // end of main
+    ResultList* list = RadixHashJoin(&rel,&rel2);
+    list->printResult();
+    delete list;
+
     return 0;
 
 }
