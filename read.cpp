@@ -1,5 +1,12 @@
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <stdint.h>
+
+
 
 using namespace std;
 
@@ -14,7 +21,7 @@ class Cell {
     Cell(string name, uint64_t col, uint64_t row): fileName(name), colNum(col), rowNum(row){
         this->array = new char*[col];
         for (int i=0; i < col; i++){
-            this->array[i] = null;
+            this->array[i] = NULL;
         }
     }
 
@@ -24,7 +31,7 @@ class Cell {
     }
 
     int findStatistics(){
-        if (this->array[0] == null){
+        if (this->array[0] == NULL){
             return 1; //error
         }
         //min, max value
@@ -36,12 +43,13 @@ class Cell {
 
 class FileArray {
     private:
-    Cell * cells;
+    Cell ** cells;
     public:
     int size;
 
-    FileArray(string * fileName, int s): size(s){
-        this->cells = new Cell[size];
+    FileArray(char ** fileName, int s): size(s){
+        this->cells = new Cell();
+        
         for (int i=0; i<size; i++){
             
             //relation.cpp code
@@ -59,7 +67,7 @@ class FileArray {
 
             int length=sb.st_size;
 
-            char* addr=static_cast<char*>(mmap(nullptr,length,PROT_READ,MAP_PRIVATE,fd,0u));
+            char* addr=static_cast<char*>(mmap(NULL,length,PROT_READ,MAP_PRIVATE,fd,0u));
             
             if (addr==MAP_FAILED) {
                 cerr << "cannot mmap " << fileName[i] << " of length " << length << endl;
@@ -77,15 +85,15 @@ class FileArray {
             addr += sizeof(row);
             uint64_t col = *addr;
             addr += sizeof(col);
-            this.cells[i] = new Cell(fileName[i], col, row);
+            this->cells[i] = new Cell(fileName[i], col, row);
             for (int j=0; j<col; j++){ 
                 if (this->cells[i]->storeRow(addr, col) == 1){
-                    cerr << "error in storeRow in" << filename[i] << endl;
+                    cerr << "error in storeRow in" << fileName[i] << endl;
                     throw;
                 }
                 addr += row*sizeof(uint64_t);         
             }
-            
+
         }
         
     }       
