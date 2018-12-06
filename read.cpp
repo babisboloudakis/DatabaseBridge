@@ -1,19 +1,20 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <fstream>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <stdint.h>
+#include <vector>
 
 
 
 using namespace std;
 
 class Cell {
-    private:
-    char ** array;
     public:
+    char ** array;
     string fileName;
     uint64_t colNum;
     uint64_t rowNum;
@@ -42,19 +43,18 @@ class Cell {
 };
 
 class FileArray {
-    private:
-    Cell ** cells;
     public:
+    Cell** cells;
     int size;
 
-    FileArray(char ** fileName, int s): size(s){
-        this->cells = new Cell();
+    FileArray(vector<string> &fileName, int s): size(s){
+        this->cells = new Cell * [s];
         
         for (int i=0; i<size; i++){
             
             //relation.cpp code
             //get pointer
-            int fd = open(fileName[i], O_RDONLY);
+            int fd = open(fileName[i].c_str(), O_RDONLY);
             if (fd==-1) {
                 cerr << "cannot open " << fileName[i] << endl;
                 throw;
@@ -83,26 +83,50 @@ class FileArray {
 
             uint64_t row = *addr;
             addr += sizeof(row);
+            cout << "RowNum: " << row << endl;
+            
             uint64_t col = *addr;
+            cout << "ColNum: " << col << endl;
             addr += sizeof(col);
             this->cells[i] = new Cell(fileName[i], col, row);
             for (int j=0; j<col; j++){ 
-                if (this->cells[i]->storeRow(addr, col) == 1){
-                    cerr << "error in storeRow in" << fileName[i] << endl;
-                    throw;
-                }
+                this->cells[i]->storeRow(addr, col);
+                uint64_t data = *addr;
+                cout << j << " col first data is: " << data << endl;
                 addr += row*sizeof(uint64_t);         
             }
 
         }
-        
-    }       
+
+            
+    }
+       
 };
 
 
 int main(void){
-    string filename;
-    cin >> filename ;
-    cout << filename ;
+    
+    // vector <char *> fileNames;
+    vector <string> fileNames;
+
+    string word;
+    cin >> word ;
+    while (word != "Done"){
+        fileNames.push_back(word);
+        cin >> word;
+    }
+    cout << "Printing ...." << endl << endl;
+    for (int i = 0; i< fileNames.size(); i++){
+        cout << fileNames[i] << endl;
+    }
+    cout << endl;
+
+
+    FileArray fileArray(fileNames, fileNames.size());
+    
+    cout << fileArray.cells[0]->colNum << endl;
+    
+    cout << endl << "Exit" << endl;
+
 
 }
