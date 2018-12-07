@@ -6,5 +6,9 @@ main.o: main.cpp
 
 run: default
 	@./main
+read: read.cpp
+	@g++ read.cpp -o read -std=c++11
+read_run:
+	@./read
 clean:
-	@rm -f *.o ./main
+	@rm -f *.o ./main ./read

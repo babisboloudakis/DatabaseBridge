@@ -1,112 +1,151 @@
-#include <iostream>
-#include <string>
-#include <cstring>
-#include <fstream>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <stdint.h>
-#include <vector>
-
-
+#include "read.hpp"
 
 using namespace std;
 
-class Cell {
-    public:
-    char ** array;
-    string fileName;
-    uint64_t colNum;
-    uint64_t rowNum;
+//CELL
 
-    Cell(string name, uint64_t col, uint64_t row): fileName(name), colNum(col), rowNum(row){
-        this->array = new char*[col];
-        for (int i=0; i < col; i++){
-            this->array[i] = NULL;
+void Cell::storeRow(uint64_t * addr, int col){ //col starts counting from 0
+    this->array[col].pointer = addr;
+    return;
+}
+
+int Cell::computeStatistics(){        //returns 1 if error
+    if (this->array[0].pointer == NULL){
+        return 1; //error
+    }
+    for (int i=0; i < (this->colNum); i++){
+        unordered_set<uint64_t> set;
+        uint64_t temp;
+        uint64_t min;
+        uint64_t max;
+        uint64_t * ptr = array[i].pointer;
+        for (int j=0; j < (this->rowNum); j++){
+            
+            temp = *(uint64_t *)(ptr);
+            //UNIQUE NUM
+            if (set.find(temp) == set.end()){   //if not in set
+                set.insert(temp);               //add it
+            }
+            //MIN
+            if (j == 0){
+                min = temp;
+            }
+            if (temp < min){ 
+                min = temp;
+            }
+            //MAX
+            if (j == 0){ 
+                max = temp;
+            }
+            if (temp > max){ 
+                max = temp;
+            }
+            ptr += 1;    
         }
+        this->array[i].min = min;
+        this->array[i].max = max;
+        this->array[i].uniqueNum = set.size();
     }
+    return 0;
+}
 
-    void storeRow(char * addr, int col){
-        this->array[col-1] = addr;
-        return;
+vector<uint64_t> * Cell::findColByRowIds (vector<uint64_t> &rowId, uint64_t col){
+    if (rowId.size() == 0){
+        return NULL;
     }
-
-    int findStatistics(){
-        if (this->array[0] == NULL){
-            return 1; //error
-        }
-        //min, max value
-        //unique values(count, or items)
-        //size (already in colNum, rowNum)
-        return 0;
+    vector<uint64_t> *p = new vector<uint64_t>;
+    uint64_t * addr = this->array[col].pointer;
+    for (int i=0; i<rowId.size(); i++){
+        (*p).push_back(*((rowId[i])*sizeof(uint64_t) + addr));
     }
-};
+    return p;
+}
 
-class FileArray {
-    public:
-    Cell** cells;
-    int size;
+uint64_t * Cell::getColPtr (uint64_t col){
+    return this->array[col].pointer;
+}
 
-    FileArray(vector<string> &fileName, int s): size(s){
-        this->cells = new Cell * [s];
-        
-        for (int i=0; i<size; i++){
-            
-            //relation.cpp code
-            //get pointer
-            int fd = open(fileName[i].c_str(), O_RDONLY);
-            if (fd==-1) {
-                cerr << "cannot open " << fileName[i] << endl;
-                throw;
-            }
+uint64_t Cell::getColMax (uint64_t col){
+    return this->array[col].max;
+}
 
-            // Obtain file size
-            struct stat sb;
-            if (fstat(fd,&sb)==-1)
-                cerr << "fstat\n";
+uint64_t Cell::getColMin(uint64_t col){
+    return this->array[col].min;
+}
 
-            int length=sb.st_size;
+uint64_t Cell::getColUniqueNum(uint64_t col){
+    return this->array[col].uniqueNum;
+}
 
-            char* addr=static_cast<char*>(mmap(NULL,length,PROT_READ,MAP_PRIVATE,fd,0u));
-            
-            if (addr==MAP_FAILED) {
-                cerr << "cannot mmap " << fileName[i] << " of length " << length << endl;
-                throw;
-            }
+uint64_t Cell::getRowNum(){
+    return this->rowNum;
+}
 
-            if (length<16) {
-                cerr << "relation file " << fileName[i] << " does not contain a valid header" << endl;
-                throw;
-            }
+uint64_t Cell::getColNum(){
+    return this->colNum;
+}
 
-            //relation.cpp code
+string Cell::getFileName(){
+    return this->fileName;
+}
 
-            uint64_t row = *addr;
-            addr += sizeof(row);
-            cout << "RowNum: " << row << endl;
-            
-            uint64_t col = *addr;
-            cout << "ColNum: " << col << endl;
-            addr += sizeof(col);
-            this->cells[i] = new Cell(fileName[i], col, row);
-            for (int j=0; j<col; j++){ 
-                this->cells[i]->storeRow(addr, col);
-                uint64_t data = *addr;
-                cout << j << " col first data is: " << data << endl;
-                addr += row*sizeof(uint64_t);         
-            }
+colInfo * Cell::getArray(){
+    return this->array;
+}
 
-        }
+//FILEARRAY
 
-            
+vector<uint64_t> * FileArray::findColByRowIds(vector<uint64_t> &rowId, uint64_t col, int relPos){
+    if(relPos >= size){
+        return NULL;
     }
-       
-};
+    return this->cells[relPos]->findColByRowIds(rowId, col);
+}
+
+uint64_t FileArray::getRowNum(int relPos){
+    return this->cells[relPos]->getRowNum();
+}
+
+uint64_t FileArray::getColNum(int relPos){
+    return this->cells[relPos]->getColNum();
+}
+
+uint64_t * FileArray::getColPtr (int relPos, uint64_t col){
+    return this->cells[relPos]->getColPtr(col);
+}
+
+string FileArray::getFileName(int relPos){
+    return this->cells[relPos]->getFileName();
+}
+
+uint64_t FileArray::getColMax (int relPos, uint64_t col){
+    return this->cells[relPos]->getColMax(col);
+}
+
+uint64_t FileArray::getColMin(int relPos, uint64_t col){
+    return this->cells[relPos]->getColMin(col);
+}
+
+uint64_t FileArray::getColUniqueNum(int relPos, uint64_t col){
+    return this->cells[relPos]->getColUniqueNum(col);
+}
+
+int FileArray::getSize(){
+    return this->size;
+}
+
+int FileArray::computeStatistics(int relPos){
+    int flag = 0;
+    for (int i=0; i < this->cells[relPos]->getColNum(); i++){
+        if(this->cells[relPos]->computeStatistics()){
+            flag = 1;
+        }       
+    }
+}
 
 
 int main(void){
     
-    // vector <char *> fileNames;
     vector <string> fileNames;
 
     string word;
@@ -124,9 +163,23 @@ int main(void){
 
     FileArray fileArray(fileNames, fileNames.size());
     
-    cout << fileArray.cells[0]->colNum << endl;
+    cout << "fileArray size: "<< fileArray.getSize() << endl ;
+    
+
+    for (int i=0; i < fileArray.getSize(); i++){
+        cout << "File: " << i << endl;
+        if(fileArray.computeStatistics(i)){
+            cerr << "Error in computeStatitics in " << i << " file" << endl;
+        }
+        for (int j=0; j < fileArray.getColNum(i); j++){
+            cout << j << " column has statistics: ";
+            cout << fileArray.getColMax(i,j) << " max, " ;
+            cout << fileArray.getColMin(i,j) << " min, " ;
+            cout << fileArray.getColUniqueNum(i,j) << " uniqueNum" << endl;
+        }
+        cout << endl;
+    }
     
     cout << endl << "Exit" << endl;
-
 
 }
