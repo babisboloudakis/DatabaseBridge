@@ -35,7 +35,14 @@ class Cell {
             this->array[i].max = 0;
             this->array[i].uniqueNum = 0;
         }
-    }
+    };
+
+    ~Cell(){
+        // for (int i=0; i < this->colNum; i++){
+        //     this->array[i].pointer  dont know what to do yet  
+        // }
+        delete(this->array);
+    };
 
     void storeRow(uint64_t * addr, int col);
 
@@ -116,7 +123,7 @@ class FileArray {
             // str[1] = "./f1.txt";
             // str[2] = "./f2.txt";
 
-            for (int j=0; j<col; j++){ 
+            for (int j=0; j<col; j++){
                 this->cells[i]->storeRow((uint64_t *)addr, j);
                 // ofstream myfile;
                 // myfile.open (str[j]);
@@ -125,12 +132,18 @@ class FileArray {
                 // }
                 uint64_t data = *(uint64_t *)(addr + sizeof(uint64_t));
                 cout << j << " col second data is: " << data << endl;
-                addr += row*sizeof(uint64_t);         
+                addr += row*sizeof(uint64_t);        
             }
-
+            this->computeStatistics(i);
         }
 
-    }
+    };
+
+    ~FileArray(){
+        for (int i=0; i < this->size; i++){
+            delete(cells[i]);
+        }
+    };
 
     vector<uint64_t> *findColByRowIds(vector<uint64_t> &rowId, uint64_t col, int relPos);
 
