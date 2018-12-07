@@ -11,21 +11,25 @@ static void splitString(string& line, vector<string>& result, const char delim) 
     }
 }
 
-// void Parser::parseRelations( string & rawSelections ) {
-//     // Parse selections
-//     char * token;
-//     vector<string> words;
-//     char * str = strdup(rawSelections.c_str());
-//     // Split string into words
-//     token = strtok(str," ");
-//     cout << token << endl;
-//     selections.push_back(atoi(token));
-//     while ( (token = strtok(NULL," ")) != NULL ) {
-//         cout << token << endl;
-//         selections.push_back(atoi(token));
-//     }
-//     free(str);
-// }
+static void splitPredicates(string& line, vector<string>& result) {
+  // Split a line into predicate strings
+  // Determine predicate type
+  for (auto cT : comparisonTypes ) {
+    if (line.find(cT)!=string::npos) {
+      splitString(line,result,cT);
+      break;
+    }
+  }
+}
+
+void Parser::parseRelCol ( string & rawPair ) { 
+    // Parse rel col pair
+    vector<string> words;
+    // Split string into words
+    splitString(rawPair,words,'.');
+    cout << words[0] << "rel " << words[1] << "col" << endl;
+    selections.emplace_back( SelectInfo( atoi(words[0].c_str()) , atoi(words[1].c_str()) ) );
+}
 
 void Parser::parseRelations( string & rawSelections ) {
     // Parse selections
@@ -33,6 +37,7 @@ void Parser::parseRelations( string & rawSelections ) {
     // Split string into words
     splitString(rawSelections,words,' ');
     for ( int i = 0; i < words.size(); i++ ) {
+        relations.push_back( atoi( words[i].c_str() ) );
         cout << words[i] << endl;
     }
 }
@@ -54,6 +59,7 @@ void Parser::parseProjections( string & rawSelections ) {
     splitString(rawSelections,words,' ');
     for ( int i = 0; i < words.size(); i++ ) {
         cout << words[i] << endl;
+        parseRelCol(words[i]);
     }
 }
 
@@ -67,10 +73,13 @@ void Parser::parseQuery( string & rawSelections ) {
     }
     cout << "now parsing relations" << endl;
     parseRelations(words[0]);
+    cout << relations.size() << endl;
     cout << "now parsing predicates" << endl;
     parsePredicates(words[1]);
     cout << "now parsing projections" << endl;
     parseProjections(words[2]);
+    cout << selections.size() << endl;
+    cout << selections[1].col << endl;
 }
 
 int main ( void ) {
