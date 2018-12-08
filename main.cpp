@@ -21,30 +21,28 @@ int main(int argc, char* argv[]) {
 
     FileArray fileArray(fileNames, fileNames.size());
     
-    cout << "fileArray size: "<< fileArray.getSize() << endl ;
+    // cout << "fileArray size: "<< fileArray.getSize() << endl ;
 
-    for (int i=0; i < fileArray.getSize(); i++){
+    // for (int i=0; i < fileArray.getSize(); i++){
         // cout << "File: " << i << endl;
         // if(fileArray.computeStatistics(i)){
         //     cerr << "Error in computeStatitics in " << i << " file" << endl;
         // }
-        for (int j=0; j < fileArray.getColNum(i); j++){
-            cout << j << " column has statistics: ";
-            cout << fileArray.getColMax(i,j) << " max, " ;
-            cout << fileArray.getColMin(i,j) << " min, " ;
-            cout << fileArray.getColUniqueNum(i,j) << " uniqueNum" << endl;
-        }
-        cout << endl;
-    }
-    
-    
-    cout << endl << "Exit" << endl;
-    
-    // Parser i;
-    // while (getline(cin, line)) {
-    //     if (line == "F") continue; // End of a batch
-    //     i.parseQuery(line);
-    //     cout << joiner.join(i);
+        // for (int j=0; j < fileArray.getColNum(i); j++){
+        //     cout << j << " column has statistics: ";
+        //     cout << fileArray.getColMax(i,j) << " max, " ;
+        //     cout << fileArray.getColMin(i,j) << " min, " ;
+        //     cout << fileArray.getColUniqueNum(i,j) << " uniqueNum" << endl;
+        // }
+        // cout << endl;
     // }
-    // return 0;
+    cout << endl << "Done computing for all files" << endl;
+    
+    Parser parser;
+    while (getline(cin, line)) {
+        if (line == "F") continue; // End of a batch
+        parser.parseQuery(line);
+        
+    }
+    return 0;
 }

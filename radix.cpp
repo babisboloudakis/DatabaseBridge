@@ -9,8 +9,8 @@ using namespace std;
 
 /** Type definition for a tuple */
 typedef struct package {
-    int32_t key;
-    int32_t payload;
+    uint64_t key;
+    uint64_t payload;
 } package;
 
 /**
@@ -19,7 +19,7 @@ typedef struct package {
 */
 typedef struct relation {
     package * tuples;
-    uint32_t num_tuples;
+    uint64_t num_tuples;
 } relation;
 
 /**
@@ -27,8 +27,8 @@ typedef struct relation {
 * It consists of a tuple of 2 keys for each rowId.
 */
 typedef struct Result {
-    int32_t key1;
-    int32_t key2;
+    uint64_t key1;
+    uint64_t key2;
 } Result; 
 
 // Struct for bucket, stores a buffer of 1MB, a pointer
@@ -106,13 +106,13 @@ class ResultList {
 
 
 // Returns the value of the n less significant bits of a payload
-int HashFunction1( int32_t payload, int n ) {
+int HashFunction1( uint64_t payload, int n ) {
     return payload & ((1 << n) - 1);
 }
 
 // We modulo the payload with a prime number
 // so that we get better divisions
-int HashFunction2( int32_t payload ) {
+int HashFunction2( uint64_t payload ) {
     return payload % PRIME; 
 }
 
@@ -153,14 +153,14 @@ ResultList * RadixHashJoin(relation *relR, relation *relS) {
     }
     // Fill up histogram with correct data
     for ( int i = 0; i < Rn; i++ ) {
-        int32_t payload = R[i].payload;
-        uint32_t bucket = HashFunction1(payload,n);
+        uint64_t payload = R[i].payload;
+        uint64_t bucket = HashFunction1(payload,n);
         // increase appropriate hist counter
         histR[bucket]++;
     }
 	for ( int i = 0; i < Sn; i++ ) {
-        int32_t payload = S[i].payload;
-        uint32_t bucket = HashFunction1(payload,n);
+        uint64_t payload = S[i].payload;
+        uint64_t bucket = HashFunction1(payload,n);
         // increase appropriate hist counter
         histS[bucket]++;
     }
@@ -181,14 +181,14 @@ ResultList * RadixHashJoin(relation *relR, relation *relS) {
 
     // Using Psum Array, create the transformed relationships
     for ( int i = 0; i < Rn; i++ ) {
-        int32_t payload = R[i].payload; // payload to write
-        uint32_t bucket = HashFunction1(payload,n); // bucket for that payload
+        uint64_t payload = R[i].payload; // payload to write
+        uint64_t bucket = HashFunction1(payload,n); // bucket for that payload
 		Rt[ psumR[bucket] ].key = R[i].key;
 		Rt[ psumR[bucket]++ ].payload = R[i].payload; 
     }
 	for ( int i = 0; i < Sn; i++ ) {
-        int32_t payload = S[i].payload; // payload to write
-        uint32_t bucket = HashFunction1(payload,n); // bucket for that payload
+        uint64_t payload = S[i].payload; // payload to write
+        uint64_t bucket = HashFunction1(payload,n); // bucket for that payload
 		St[ psumS[bucket] ].key = S[i].key;
 		St[ psumS[bucket]++ ].payload = S[i].payload; 
     }
@@ -215,23 +215,23 @@ ResultList * RadixHashJoin(relation *relR, relation *relS) {
         }
 
         //initialize bucketArray
-        uint32_t* bucketArray = new uint32_t[PRIME];
+        uint64_t* bucketArray = new uint64_t[PRIME];
         for (int i = 0; i < PRIME; i++){
             bucketArray[i] = 0;	
         }	
-        uint32_t last;
+        uint64_t last;
         //select smallest bucket
         if (histR[temp] <= histS[temp]){
-            uint32_t * chain = new uint32_t[histR[temp]];
+            uint64_t * chain = new uint64_t[histR[temp]];
             for (int i = 0; i < histR[temp]; i++){
-                uint32_t bucket = HashFunction2(bucketR[i].payload); // bucket for that payload
+                uint64_t bucket = HashFunction2(bucketR[i].payload); // bucket for that payload
                 last = bucketArray[bucket];			
                 bucketArray[bucket] = i + 1;	
                 chain[i] = last;		
             }
             //go to other bucket		
             for (int i = 0; i < histS[temp]; i++){
-                uint32_t bucket = HashFunction2(bucketS[i].payload); // bucket for that payload
+                uint64_t bucket = HashFunction2(bucketS[i].payload); // bucket for that payload
                 if ( (last = bucketArray[bucket]) != 0){    //if there is a hash
                     if (bucketR[last-1].payload == bucketS[i].payload){     //if there is a match
                         //add to result
@@ -258,16 +258,16 @@ ResultList * RadixHashJoin(relation *relR, relation *relS) {
             delete chain;
         }
         else{
-            uint32_t * chain = new uint32_t[histS[temp]];
+            uint64_t * chain = new uint64_t[histS[temp]];
             for (int i = 0; i < histS[temp]; i++){
-                uint32_t bucket = HashFunction2(bucketS[i].payload); // bucket for that payload
-                uint32_t last = bucketArray[bucket];			
+                uint64_t bucket = HashFunction2(bucketS[i].payload); // bucket for that payload
+                uint64_t last = bucketArray[bucket];			
                 bucketArray[bucket] = i + 1;	
                 chain[i] = last;		
             }
             //go to other bucket		
             for (int i = 0; i < histR[temp]; i++){
-                uint32_t bucket = HashFunction2(bucketR[i].payload); // bucket for that payload
+                uint64_t bucket = HashFunction2(bucketR[i].payload); // bucket for that payload
                 if ( (last = bucketArray[bucket]) != 0){    //if there is a hash
                     if (bucketS[last-1].payload == bucketR[i].payload){     //if there is a match
                         //add to result
