@@ -1,40 +1,36 @@
 #include <iostream>
+#include "parser.hpp"
+#include "read.hpp"
+#include <vector> 
 
 using namespace std;
 
-typedef struct midResult {
-    // struct for midResult vector
-        
-
-} midResult;
-
-
-vector<midResult> * filterResults ( vector<midResult> * results, uint64_t rel, uint64_t col, filterOperation op , uint64_t value ) {
+void filterResults( RelationResults & results, FilterInfo filter, FileArray & fileArray ) {
 
     // New vector with results after filtering
-    vector<midResult> * filteredResults;
+    vector<uint64_t> * filteredResults = new vector<uint64_t>;
 
     // Get the values to be filtered throught the mid results
-    vector<uint64_t> * values = findColByRowIds( results );
+    vector<uint64_t> * values = fileArray.findColByRowIds( results.rowIds, filter.col, filter.rel );
 
     // Loop throught results and apply filter
     for ( int index = 0; index < values.size(); index++ ) {
 
         // Execute selected filter operation
-        switch( op ) {
-            case LESS:
-                if ( values[index] < value ) {
-                    filteredResults.push_back( results[index] );
+        switch( filter.op ) {
+            case FilterInfo::FilterOperation::LESS:
+                if ( values[index] < filter.constant ) { 
+                    filteredResults->push_back( results.rowIds[index] );
                 }
                 break;
-            case GREATER:
-                if ( values[index] > value ) {
-                    filteredResults.push_back( results[index] );
+            case FilterInfo::FilterOperation::GREATER:
+                if ( values[index] > filter.constant ) {
+                    filteredResults->push_back( results.rowIds[index] );
                 }
                 break;
-            case EQUAL:
-                if ( values[index] == value ) {
-                    filteredResults.push_back( results[index] );
+            case FilterInfo::FilterOperation::EQUAL:
+                if ( values[index] == filter.constant ) {
+                    filteredResults->push_back( results.rowIds[index] );
                 }
                 break;
         }
@@ -42,10 +38,11 @@ vector<midResult> * filterResults ( vector<midResult> * results, uint64_t rel, u
     }
 
     // delete previous unnecessary vector
-    delete results;
+    delete results.rowIds;
+    results.rowIds = filteredResults;
+    // Delete values allocated by findColByRowIds
     delete values;
 
-    // return results
-    return filteredResults;
-
 }
+
+main(){}
