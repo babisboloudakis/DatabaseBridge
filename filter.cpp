@@ -2,13 +2,6 @@
 
 using namespace std;
 
-enum filterOperation {
-    // enumeration of all filter operations
-    LESS,
-    GREATER,
-    EQUAL
-};
-
 typedef struct midResult {
     // struct for midResult vector
         

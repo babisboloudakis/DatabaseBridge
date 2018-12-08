@@ -27,8 +27,7 @@ void Parser::parseRelCol ( string & rawPair ) {
     vector<string> words;
     // Split string into words
     splitString(rawPair,words,'.');
-    cout << words[0] << "rel " << words[1] << "col" << endl;
-    selections.emplace_back( SelectInfo( atoi(words[0].c_str()) , atoi(words[1].c_str()) ) );
+    selections.emplace_back( SelectInfo( relations[stoul(words[0])] , stoul(words[1]) ) );
 }
 
 void Parser::parseRelations( string & rawSelections ) {
@@ -37,9 +36,33 @@ void Parser::parseRelations( string & rawSelections ) {
     // Split string into words
     splitString(rawSelections,words,' ');
     for ( int i = 0; i < words.size(); i++ ) {
-        relations.push_back( atoi( words[i].c_str() ) );
-        cout << words[i] << endl;
+        relations.push_back( stoul( words[i] ) );
     }
+}
+
+SelectInfo Parser::parsePair ( string & rawPair ) { 
+    // Parse rel col pair
+    vector<string> words;
+    // Split string into words
+    splitString(rawPair,words,'.');
+    return SelectInfo( stoul(words[0]) , stoul(words[1]) );
+}
+
+inline static bool isConstant(string& raw) { return raw.find('.')==string::npos; }
+
+void Parser::parsePredicate(string& rawPredicate) {
+
+    vector<string> preds;
+    splitPredicates(rawPredicate, preds);
+    SelectInfo left = parsePair(preds[0]);
+    if ( isConstant(preds[1]) ) { // filter operation
+        char compType=rawPredicate[preds[0].size()];
+        filters.emplace_back( FilterInfo( relations[left.rel], left.col, stoul(preds[1]), FilterInfo::FilterOperation(compType) ) );
+    } else { // Join operation
+        SelectInfo right = parsePair(preds[1]);
+        joins.emplace_back( JoinInfo( relations[left.rel], left.col, relations[right.rel], right.col ) );
+    }
+
 }
 
 void Parser::parsePredicates( string & rawSelections ) {
@@ -48,7 +71,7 @@ void Parser::parsePredicates( string & rawSelections ) {
     // Split string into words
     splitString(rawSelections,words,'&');
     for ( int i = 0; i < words.size(); i++ ) {
-        cout << words[i] << endl;
+        parsePredicate(words[i]);
     }
 }
 
@@ -58,7 +81,6 @@ void Parser::parseProjections( string & rawSelections ) {
     // Split string into words
     splitString(rawSelections,words,' ');
     for ( int i = 0; i < words.size(); i++ ) {
-        cout << words[i] << endl;
         parseRelCol(words[i]);
     }
 }
@@ -68,24 +90,41 @@ void Parser::parseQuery( string & rawSelections ) {
     vector<string> words;
     // Split string into words
     splitString(rawSelections,words,'|');
-    for ( int i = 0; i < words.size(); i++ ) {
-        cout << words[i] << endl;
-    }
-    cout << "now parsing relations" << endl;
+    
     parseRelations(words[0]);
-    cout << relations.size() << endl;
-    cout << "now parsing predicates" << endl;
     parsePredicates(words[1]);
-    cout << "now parsing projections" << endl;
     parseProjections(words[2]);
-    cout << selections.size() << endl;
-    cout << selections[1].col << endl;
+ 
+}
+
+void Parser::printParseInfo() {
+    // Print parse info for debugging purposes
+    cout << "Relations" << endl;
+    for ( int i = 0; i < relations.size(); i++ ) {
+        cout << '\t' << relations[i] << endl;
+    }
+
+    cout << "Filters" << endl;
+    for ( int i = 0; i < filters.size(); i++ ) {
+        cout << '\t' << filters[i].rel << '\t' << filters[i].col << '\t' << (char)filters[i].op << '\t' << filters[i].constant << endl;
+    }
+
+    cout << "Joins" << endl;
+    for ( int i = 0; i < joins.size(); i++ ) {
+        cout << '\t' << joins[i].rel1 << '\t' << joins[i].col1 << '\t' << joins[i].rel2 << '\t' << joins[i].col2 << endl;
+    }
+
+    cout << "Projections" << endl;
+    for ( int i = 0; i < selections.size(); i++ ) {
+        cout << '\t' << selections[i].rel << '\t' << selections[i].col << endl;
+    }
 }
 
 int main ( void ) {
 
     string str = "0 2 4|0.1=1.2&1.0=2.1&0.1>3000|0.0 1.1";
-    
+    cout << str << endl;
     Parser parser;
     parser.parseQuery(str);
+    parser.printParseInfo();
 }
