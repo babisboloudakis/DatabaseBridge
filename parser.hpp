@@ -3,26 +3,30 @@
 #include <iostream>
 #include <cstdint>
 #include <cstring>
+// #include "filter.hpp"
+#include "read.hpp"
+
+using namespace std;
 
 typedef struct SelectInfo { 
     // struct that contains info for select, relation.col
-    uint64_t rel;
+    int rel;
     uint64_t col;
     // Struct constructor
-    SelectInfo(uint64_t rel, uint64_t col) : rel(rel), col(col) {};
+    SelectInfo(int rel, uint64_t col) : rel(rel), col(col) {};
 
 } SelectInfo;
 
 
 typedef struct JoinInfo {
     // struct that contains info for join
-    uint64_t rel1;
+    int rel1;
     uint64_t col1;
-    uint64_t rel2;
+    int rel2;
     uint64_t col2;
 
     // Struct constructor
-    JoinInfo(uint64_t rel1,uint64_t col1,uint64_t rel2,
+    JoinInfo(int rel1,uint64_t col1,int rel2,
     uint64_t col2) : rel1(rel1), col1(col1), rel2(rel2), col2(col2){};
 
 } JoinInfo;
@@ -37,40 +41,62 @@ typedef struct FilterInfo {
     };
 
     // info about a filter operation
-    uint64_t rel;
+    int rel;
     uint64_t col;
     uint64_t constant;
     FilterOperation op;
 
     // Constructor for filterInfo
-    FilterInfo(uint64_t rel, uint64_t col, uint64_t constant, FilterOperation op) : rel(rel), col(col), constant(constant), op(op) {};
+    FilterInfo(int rel, uint64_t col, uint64_t constant, FilterOperation op) : rel(rel), col(col), constant(constant), op(op) {};
 
 } FilterInfo;
-static const std::vector<FilterInfo::FilterOperation> comparisonTypes { FilterInfo::FilterOperation::LESS, FilterInfo::FilterOperation::GREATER, FilterInfo::FilterOperation::EQUAL};
+static const vector<FilterInfo::FilterOperation> comparisonTypes { FilterInfo::FilterOperation::LESS, FilterInfo::FilterOperation::GREATER, FilterInfo::FilterOperation::EQUAL};
 
+typedef struct RelationResults {
+
+    int relPos;
+    vector<uint64_t> * rowIds;
+
+} RelationResults ;
+ 
+void filterResults( RelationResults & results, FilterInfo filter, FileArray & fileArray );
 
 class Parser {
 
     public:
     // Vector of selections
-    std::vector<uint64_t> relations;
-    std::vector<SelectInfo> selections;
-    std::vector<FilterInfo> filters;
-    std::vector<JoinInfo> joins;
+    vector<int> relations;
+    vector<SelectInfo> selections;
+    vector<FilterInfo> filters;
+    vector<JoinInfo> joins;
+    //midreasult
+    vector<RelationResults> results;
+    
+
 
     public:
-    Parser(){};
-    ~Parser(){};
+    Parser(){}; 
+    ~Parser(){}; //destry pointers
+
+    //fnct -> compute(fileArray, string){ parseQuery , prakseis, putresult }
+    void computeQuery(FileArray & fileArray, string & line);
+    //private
+    //fnct -> prakseis((min, max)fliters->midresults epilogh twn joins->joins diaxeirish mid result)
+    void compute(FileArray & fileArray);
+    void printResult();
+    //applyfiter(&RelationResults, col, &fileArray ) (vector[2],f)
+    //applyjoin to diff()
+    //apply join to same()
 
     // parse rel col pair < x.y >
-    void parseRelCol( std::string & rawPair );
-    void parsePredicate( std::string & predicate );
-    SelectInfo parsePair ( std::string & rawPair );
+    void parseRelCol( string & rawPair );
+    void parsePredicate( string & predicate );
+    SelectInfo parsePair ( string & rawPair );
 
-    void parseRelations( std::string & rawSelections );
-    void parsePredicates( std::string & rawPredicates );
-    void parseProjections( std::string & rawProjections );
-    void parseQuery( std::string & rawQuery );
+    void parseRelations( string & rawSelections );
+    void parsePredicates( string & rawPredicates );
+    void parseProjections( string & rawProjections );
+    void parseQuery( string & rawQuery );
 
     // print method
     void printParseInfo();

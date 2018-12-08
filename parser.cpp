@@ -22,6 +22,47 @@ static void splitPredicates(string& line, vector<string>& result) {
   }
 }
 
+void Parser::printResult(){
+    for(int i=0; i<this->selections.size(); i++){
+        
+             
+    }
+}
+
+void Parser::compute(FileArray & fileArray){
+    //filters first
+    //if (this->filters.size()) {   //if not empty
+        for (int i=0; i<this->filters.size(); i++){
+            int index=-1;
+            for (int j=0; j<this->results.size(); j++){
+                if (this->results[j].relPos == this->filters[i].rel){
+                    index=j;
+                }
+            }
+            if (index < 0){
+                RelationResults res;
+                res.relPos = this->filters[i].rel;
+                res.rowIds = new vector<uint64_t>;
+                for (uint64_t k=0; k < fileArray.getRowNum(res.relPos); k++){
+                    res.rowIds->push_back(k);
+                }
+                this->results.emplace_back(res);
+                index = results.size()-1;        
+            }
+            
+        }
+    //}        
+}
+
+void Parser::computeQuery(FileArray & fileArray, string & line) {
+    //parse Query info
+    this->parseQuery(line);
+    //do computations
+    this->compute(fileArray);
+    //print results to std::out
+    this->printResult();
+}
+
 void Parser::parseRelCol ( string & rawPair ) { 
     // Parse rel col pair
     vector<string> words;
@@ -120,11 +161,3 @@ void Parser::printParseInfo() {
     }
 }
 
-int main ( void ) {
-
-    string str = "0 2 4|0.1=1.2&1.0=2.1&0.1>3000|0.0 1.1";
-    cout << str << endl;
-    Parser parser;
-    parser.parseQuery(str);
-    parser.printParseInfo();
-}
