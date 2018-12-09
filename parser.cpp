@@ -222,7 +222,16 @@ void Parser::computeJoins(FileArray &fileArray){
             index2 = midResults.size() - 1;
         }
         // In any other case, use Radix Hash Join
-        RadixHashJoin(midResults[index1],midResults[index2],joins[joinIndex],fileArray);
+        MidResult * FinalResults = RadixHashJoin(midResults[index1],midResults[index2],joins[joinIndex],fileArray);
+        if ( index1 < index2 ) {
+            midResults.erase(midResults.begin()+index2);
+            midResults.erase(midResults.begin()+index1);
+        } else {
+            midResults.erase(midResults.begin()+index1);
+            midResults.erase(midResults.begin()+index2);
+        }
+        midResults.push_back( *FinalResults );
+
     }
  
 }

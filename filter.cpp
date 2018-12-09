@@ -104,14 +104,20 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
     for ( int i = 0; i < results1.rels->size(); i++ ) {
         joinedMid->rels->push_back( results1.rels->at(i) );
     }
+
     for ( int i = 0; i < results2.rels->size(); i++ ) {
         joinedMid->rels->push_back( results2.rels->at(i) );
     }
-    for ( int i = 0; i < joinedMid->rels->size(); i++ ) {
-        joinedMid->res->at(i).relPos = joinedMid->rels->at(i);
-        joinedMid->res->at(i).rowIds = new vector<uint64_t>;
-    }
     
+    for ( int i = 0; i < joinedMid->rels->size(); i++ ) {
+        RelationResults relation;
+        relation.relPos = joinedMid->rels->at(i);
+        relation.rowIds = new vector<uint64_t>;
+        joinedMid->res->push_back(relation);
+        // joinedMid->res->at(i).relPos = joinedMid->rels->at(i);
+        // joinedMid->res->at(i).rowIds = new vector<uint64_t>;
+    }
+
     // Use the two vector to create relations structs
     relation relR;
     relR.num_tuples = results1.res->at(index1).rowIds->size();
@@ -120,8 +126,6 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
     for( int i = 0; i < relR.num_tuples; i++ ) {
         relR.tuples[i].key = results1.res->at(index1).rowIds->at(i);
         relR.tuples[i].index = i;
-        
-        
         relR.tuples[i].payload = (*values1)[i];
     }
 
@@ -133,12 +137,10 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
     for( int i = 0; i < relS.num_tuples; i++ ) {
         relS.tuples[i].key = results2.res->at(index2).rowIds->at(i);
         relS.tuples[i].index = i;
-        
-        
         relS.tuples[i].payload = (*values2)[i];
     }
 
- 
+
     // ----------------
     // |  FIRST PART  |
     // ----------------
@@ -262,7 +264,7 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
                                 joinedMid->res->at(k).rowIds->push_back( results1.res->at(k).rowIds->at(ind1) );
                             }
                             else {
-                                joinedMid->res->at(k).rowIds->push_back( results2.res->at(k).rowIds->at(ind2) );
+                                joinedMid->res->at(k).rowIds->push_back( results2.res->at(k - results1.rels->size() ).rowIds->at(ind2) );
                             }
                         }
                     }
@@ -281,7 +283,7 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
                                     joinedMid->res->at(k).rowIds->push_back( results1.res->at(k).rowIds->at(ind1) );
                                 }
                                 else {
-                                    joinedMid->res->at(k).rowIds->push_back( results2.res->at(k).rowIds->at(ind2) );
+                                    joinedMid->res->at(k).rowIds->push_back( results2.res->at(k - results1.rels->size() ).rowIds->at(ind2) );
                                 }
                             }
                             // delete result; 
@@ -312,7 +314,7 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
                                 joinedMid->res->at(k).rowIds->push_back( results1.res->at(k).rowIds->at(ind1) );
                             }
                             else {
-                                joinedMid->res->at(k).rowIds->push_back( results2.res->at(k).rowIds->at(ind2) );
+                                joinedMid->res->at(k).rowIds->push_back( results2.res->at(k - results1.rels->size()).rowIds->at(ind2) );
                             }
                         }
                     }
@@ -328,7 +330,7 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
                                     joinedMid->res->at(k).rowIds->push_back( results1.res->at(k).rowIds->at(ind1) );
                                 }
                                 else {
-                                    joinedMid->res->at(k).rowIds->push_back( results2.res->at(k).rowIds->at(ind2) );
+                                    joinedMid->res->at(k).rowIds->push_back( results2.res->at(k - results1.rels->size()).rowIds->at(ind2) );
                                 }
                             }
                         }
@@ -343,7 +345,7 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
         delete bucketS;
         delete bucketR;
     }
-	
+
     // ----------------
     // |  THIRD PART  |
     // ----------------
