@@ -54,6 +54,7 @@ void filterResults( RelationResults & results, FilterInfo filter, FileArray & fi
 typedef struct package {
     uint64_t key;
     uint64_t payload;
+    int index;
 } package;
 
 /**
@@ -86,32 +87,54 @@ int HashFunction2( uint64_t payload ) {
 }
 
 /** Radix Hash Join**/
-void RadixHashJoin( RelationResults & results1, RelationResults & results2, JoinInfo & join, FileArray & fileArray ) {
+MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo & join, FileArray & fileArray ) {
+
+    int index1, index2;
+     for ( int i = 0; i < results1.rels->size(); i++ ) {
+        if ( results1.rels->at(i) == join.rel1 ) index1 = i;
+    }
+    for ( int i = 0; i < results2.rels->size(); i++ ) {
+        if ( results2.rels->at(i) == join.rel2 ) index2 = i;
+    }
 
     // New vector with results after joining
-    vector<uint64_t> * joinedResults1 = new vector<uint64_t>;
-    vector<uint64_t> * joinedResults2 = new vector<uint64_t>;
-
-
+    MidResult * joinedMid = new MidResult;
+    joinedMid->rels = new vector<int>;
+    joinedMid->res = new vector<RelationResults>;
+    for ( int i = 0; i < results1.rels->size(); i++ ) {
+        joinedMid->rels->push_back( results1.rels->at(i) );
+    }
+    for ( int i = 0; i < results2.rels->size(); i++ ) {
+        joinedMid->rels->push_back( results2.rels->at(i) );
+    }
+    for ( int i = 0; i < joinedMid->rels->size(); i++ ) {
+        joinedMid->res->at(i).relPos = joinedMid->rels->at(i);
+        joinedMid->res->at(i).rowIds = new vector<uint64_t>;
+    }
+    
     // Use the two vector to create relations structs
     relation relR;
-    relR.num_tuples = results1.rowIds->size();
+    relR.num_tuples = results1.res->at(index1).rowIds->size();
     relR.tuples = new package[relR.num_tuples];
-    // initialize the values in relations
-    vector<uint64_t> * values1 = fileArray.findColByRowIds( *(results1.rowIds), join.col1, join.rel1 );
+    vector<uint64_t> * values1 = fileArray.findColByRowIds( *(results1.res->at(index1).rowIds), join.col1, join.rel1 );
     for( int i = 0; i < relR.num_tuples; i++ ) {
-        relR.tuples[i].key = (*results1.rowIds)[i];
+        relR.tuples[i].key = results1.res->at(index1).rowIds->at(i);
+        relR.tuples[i].index = i;
+        
+        
         relR.tuples[i].payload = (*values1)[i];
     }
 
     // Use the two vector to create relations structs
     relation relS;
-    relS.num_tuples = results2.rowIds->size();
-    relS.tuples = new package[relR.num_tuples];
-    // initialize the values in relations
-    vector<uint64_t> * values2 = fileArray.findColByRowIds( *(results2.rowIds), join.col2, join.rel2 );
+    relS.num_tuples = results2.res->at(index2).rowIds->size();
+    relS.tuples = new package[relS.num_tuples];
+    vector<uint64_t> * values2 = fileArray.findColByRowIds( *(results2.res->at(index2).rowIds), join.col2, join.rel2 );
     for( int i = 0; i < relS.num_tuples; i++ ) {
-        relS.tuples[i].key = (*results2.rowIds)[i];
+        relS.tuples[i].key = results2.res->at(index2).rowIds->at(i);
+        relS.tuples[i].index = i;
+        
+        
         relS.tuples[i].payload = (*values2)[i];
     }
 
@@ -179,12 +202,14 @@ void RadixHashJoin( RelationResults & results1, RelationResults & results2, Join
         uint64_t payload = R[i].payload; // payload to write
         uint64_t bucket = HashFunction1(payload,n); // bucket for that payload
 		Rt[ psumR[bucket] ].key = R[i].key;
+        Rt[ psumR[bucket] ].index = R[i].index; // INDEX
 		Rt[ psumR[bucket]++ ].payload = R[i].payload; 
     }
 	for ( int i = 0; i < Sn; i++ ) {
         uint64_t payload = S[i].payload; // payload to write
         uint64_t bucket = HashFunction1(payload,n); // bucket for that payload
 		St[ psumS[bucket] ].key = S[i].key;
+        St[ psumR[bucket] ].index = S[i].index; // INDEX
 		St[ psumS[bucket]++ ].payload = S[i].payload; 
     }
 
@@ -230,24 +255,36 @@ void RadixHashJoin( RelationResults & results1, RelationResults & results2, Join
                 if ( (last = bucketArray[bucket]) != 0){    //if there is a hash
                     if (bucketR[last-1].payload == bucketS[i].payload){     //if there is a match
                         //add to result
-                        Result * result = new Result;
-                        result->key1 = bucketR[last-1].key;
-                        result->key2 = bucketS[i].key;
-                        joinedResults1->push_back(result->key1);
-                        joinedResults2->push_back(result->key2);
-                        delete result;
+                        int ind1 = bucketR[last-1].index;
+                        int ind2 = bucketS[i].index;
+                        for ( int k = 0; k < joinedMid->rels->size(); k++ ) {
+                            if ( k < results1.rels->size() ) {
+                                joinedMid->res->at(k).rowIds->push_back( results1.res->at(k).rowIds->at(ind1) );
+                            }
+                            else {
+                                joinedMid->res->at(k).rowIds->push_back( results2.res->at(k).rowIds->at(ind2) );
+                            }
+                        }
                     }
                     //go to next
                     while (chain[last-1] !=0){
                         last = chain[last-1];
                         if (bucketR[last-1].payload == bucketS[i].payload){
                             //add to result
-                            Result * result = new Result;
-                            result->key1 = bucketR[last-1].key;
-                            result->key2 = bucketS[i].key;
-                            joinedResults1->push_back(result->key1);
-                            joinedResults2->push_back(result->key2);
-                            delete result; 
+                            // Result * result = new Result;
+                            // result->key1 = bucketR[last-1].key;
+                            // result->key2 = bucketS[i].key;
+                            int ind1 = bucketR[last-1].index;
+                            int ind2 = bucketS[i].index;
+                            for ( int k = 0; k < joinedMid->rels->size(); k++ ) {
+                                if ( k < results1.rels->size() ) {
+                                    joinedMid->res->at(k).rowIds->push_back( results1.res->at(k).rowIds->at(ind1) );
+                                }
+                                else {
+                                    joinedMid->res->at(k).rowIds->push_back( results2.res->at(k).rowIds->at(ind2) );
+                                }
+                            }
+                            // delete result; 
                         }
                     }    
                 }	
@@ -268,24 +305,32 @@ void RadixHashJoin( RelationResults & results1, RelationResults & results2, Join
                 if ( (last = bucketArray[bucket]) != 0){    //if there is a hash
                     if (bucketS[last-1].payload == bucketR[i].payload){     //if there is a match
                         //add to result
-                        Result * result = new Result;
-                        result->key1 = bucketR[i].key;
-                        result->key2 = bucketS[last-1].key;
-                        joinedResults1->push_back(result->key1);
-                        joinedResults2->push_back(result->key2);
-                        delete result;
+                        int ind1 = bucketR[i].index;
+                        int ind2 = bucketS[last-1].index;
+                        for ( int k = 0; k < joinedMid->rels->size(); k++ ) {
+                            if ( k < results1.rels->size() ) {
+                                joinedMid->res->at(k).rowIds->push_back( results1.res->at(k).rowIds->at(ind1) );
+                            }
+                            else {
+                                joinedMid->res->at(k).rowIds->push_back( results2.res->at(k).rowIds->at(ind2) );
+                            }
+                        }
                     }
                     //go to next
                     while (chain[last-1] !=0){
                         last = chain[last-1];
                         if (bucketS[last-1].payload == bucketR[i].payload){
                             //add to result
-                            Result * result = new Result;
-                            result->key1 = bucketR[i].key;
-                            result->key2 = bucketS[last-1].key;
-                            joinedResults1->push_back(result->key1);
-                            joinedResults2->push_back(result->key2);
-                            delete result;
+                            int ind1 = bucketR[i].index;
+                            int ind2 = bucketS[last-1].index;
+                            for ( int k = 0; k < joinedMid->rels->size(); k++ ) {
+                                if ( k < results1.rels->size() ) {
+                                    joinedMid->res->at(k).rowIds->push_back( results1.res->at(k).rowIds->at(ind1) );
+                                }
+                                else {
+                                    joinedMid->res->at(k).rowIds->push_back( results2.res->at(k).rowIds->at(ind2) );
+                                }
+                            }
                         }
                     }    
                 }	
@@ -313,12 +358,43 @@ void RadixHashJoin( RelationResults & results1, RelationResults & results2, Join
     delete St;
 
     // Delete of previous rowId vectors
-    delete results1.rowIds;
-    delete results2.rowIds;
+    delete results1.rels;
+    delete results2.rels;
+    for ( int i = 0; i < results1.res->size(); i++ ) {
+        delete results1.res->at(i).rowIds;
+    }
+    delete results1.res;
+    for ( int i = 0; i < results2.res->size(); i++ ) {
+        delete results2.res->at(i).rowIds;
+    }
+    delete results2.res;
+
     delete values1;
     delete values2;
     // Replace with our new vectors
-    results1.rowIds = joinedResults1;
-    results2.rowIds = joinedResults2;
-
+    return joinedMid;
 }
+
+// void selfJoin( RelationResults & results, JoinInfo & join, FileArray & fileArray ){
+//     vector<uint64_t> * val1, val2;
+//     vector<uint64_t> * newRowIds = new vector<uint64_t>;
+//     val1 = fileArray.findColByRowIds(*(results.rowIds), join.col1, join.rel1);
+//     val2 = fileArray.findColByRowIds(*(results.rowIds), join.col2, join.rel2);
+
+//     for (int i=0; i < results.rowIds->size(); i++){
+//         if ((*val1)[i] == (*val2)[i]){
+//             newRowIds->push_back((*results.rowIds)[i]);
+//         }
+//     }
+//     delete(results.rowIds);
+//     results.rowIds = newRowIds;
+    
+// }
+
+// void joinedRelJoin(){
+//     return;
+// }
+
+// void crossProduct(){
+//     return;
+// }
