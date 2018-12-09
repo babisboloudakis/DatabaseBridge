@@ -100,8 +100,8 @@ void RadixHashJoin( RelationResults & results1, RelationResults & results2, Join
     // initialize the values in relations
     vector<uint64_t> * values1 = fileArray.findColByRowIds( *(results1.rowIds), join.col1, join.rel1 );
     for( int i = 0; i < relR.num_tuples; i++ ) {
-        relR->tuples[i].key = (*results1.rowIds)[i];
-        relR->tuples[i].payload = (*values1)[i];
+        relR.tuples[i].key = (*results1.rowIds)[i];
+        relR.tuples[i].payload = (*values1)[i];
     }
 
     // Use the two vector to create relations structs
@@ -111,8 +111,8 @@ void RadixHashJoin( RelationResults & results1, RelationResults & results2, Join
     // initialize the values in relations
     vector<uint64_t> * values2 = fileArray.findColByRowIds( *(results2.rowIds), join.col2, join.rel2 );
     for( int i = 0; i < relS.num_tuples; i++ ) {
-        relS->tuples[i].key = (*results2.rowIds)[i];
-        relS->tuples[i].payload = (*values2)[i];
+        relS.tuples[i].key = (*results2.rowIds)[i];
+        relS.tuples[i].payload = (*values2)[i];
     }
 
  
@@ -120,11 +120,11 @@ void RadixHashJoin( RelationResults & results1, RelationResults & results2, Join
     // |  FIRST PART  |
     // ----------------
     // Get the size of each relation
-    int Rn = relR->num_tuples;
-    int Sn = relS->num_tuples;
+    int Rn = relR.num_tuples;
+    int Sn = relS.num_tuples;
     // Get the relationship arrays
-    package * R = relR->tuples;
-    package * S = relS->tuples;
+    package * R = relR.tuples;
+    package * S = relS.tuples;
     // Also create the two new arrays
     package * Rt = new package[Rn];
     package * St = new package[Sn];
@@ -233,8 +233,8 @@ void RadixHashJoin( RelationResults & results1, RelationResults & results2, Join
                         Result * result = new Result;
                         result->key1 = bucketR[last-1].key;
                         result->key2 = bucketS[i].key;
-                        joinedResults1.push_back(result->key1);
-                        joinedResults2.push_back(result->key2);
+                        joinedResults1->push_back(result->key1);
+                        joinedResults2->push_back(result->key2);
                         delete result;
                     }
                     //go to next
@@ -245,8 +245,8 @@ void RadixHashJoin( RelationResults & results1, RelationResults & results2, Join
                             Result * result = new Result;
                             result->key1 = bucketR[last-1].key;
                             result->key2 = bucketS[i].key;
-                            joinedResults1.push_back(result->key1);
-                            joinedResults2.push_back(result->key2);
+                            joinedResults1->push_back(result->key1);
+                            joinedResults2->push_back(result->key2);
                             delete result; 
                         }
                     }    
@@ -271,8 +271,8 @@ void RadixHashJoin( RelationResults & results1, RelationResults & results2, Join
                         Result * result = new Result;
                         result->key1 = bucketR[i].key;
                         result->key2 = bucketS[last-1].key;
-                        joinedResults1.push_back(result->key1);
-                        joinedResults2.push_back(result->key2);
+                        joinedResults1->push_back(result->key1);
+                        joinedResults2->push_back(result->key2);
                         delete result;
                     }
                     //go to next
@@ -283,8 +283,8 @@ void RadixHashJoin( RelationResults & results1, RelationResults & results2, Join
                             Result * result = new Result;
                             result->key1 = bucketR[i].key;
                             result->key2 = bucketS[last-1].key;
-                            joinedResults1.push_back(result->key1);
-                            joinedResults2.push_back(result->key2);
+                            joinedResults1->push_back(result->key1);
+                            joinedResults2->push_back(result->key2);
                             delete result;
                         }
                     }    
@@ -321,15 +321,4 @@ void RadixHashJoin( RelationResults & results1, RelationResults & results2, Join
     results1.rowIds = joinedResults1;
     results2.rowIds = joinedResults2;
 
-}
-
-
-
-int main ( void ) {
-
-    string str = "0 2 4|0.1=1.2&1.0=2.1&0.1>3000|0.0 1.1";
-    cout << str << endl;
-    Parser parser;
-    parser.parseQuery(str);
-    parser.printParseInfo();
 }
