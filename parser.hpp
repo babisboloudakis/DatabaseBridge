@@ -78,27 +78,34 @@ class Parser {
     vector<FilterInfo> filters;
     vector<JoinInfo> joins;
     //midreasult
-    vector<MidResult> midResults;
-    vector<RelationResults> results;
-    
+    vector<MidResult> midResults;    
 
 
     public:
     Parser(){}; 
     ~Parser(){
-        for (int i=0; i < this->results.size(); i++){
-            if (this->results[i].rowIds != NULL){
-                delete(this->results[i].rowIds);
+        for (int i=0; i < this->midResults.size(); i++){
+            if (this->midResults[i].res != NULL){
+                for (int j=0; j < this->midResults[i].res->size(); j++){
+                    if ( (*(this->midResults[i].res))[j].rowIds != NULL){
+                        delete ((*(this->midResults[i].res))[j].rowIds);    
+                    }
+                }
+                delete(this->midResults[i].res);
+            }
+            if (this->midResults[i].rels != NULL){
+                delete(this->midResults[i].rels); 
             }
         }    
-    }; //destry pointers
+    }; //delete pointers
 
     //fnct -> compute(fileArray, string){ parseQuery , prakseis, putresult }
     void computeQuery(FileArray & fileArray, string & line);
     //private
     //fnct -> prakseis((min, max)fliters->midresults epilogh twn joins->joins diaxeirish mid result)
     void optimize(FileArray & fileArray);
-    void compute(FileArray & fileArray);
+    void computeFilters(FileArray & fileArray);
+    void computeJoins(FileArray & fileArray);
     void printResult(FileArray & fileArray);
     //applyfiter(&RelationResults, col, &fileArray ) (vector[2],f)
     //applyjoin to diff()

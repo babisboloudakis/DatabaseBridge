@@ -23,65 +23,100 @@ static void splitPredicates(string& line, vector<string>& result) {
 }
 
 void Parser::printResult(FileArray &fileArray){
-    for(int i=0; i<this->selections.size(); i++){
-        int index=-1;
-        vector<uint64_t> * val;
-        uint64_t sum=0;
-        for (int j=0; j<this->results.size(); j++){
-            if (this->results[j].relPos == this->selections[i].rel){
-                index=j;
+    if (this->midResults.size() > 1){
+        cerr << "Cant Process CrossProduct" << endl;
+        cout << "NULL" << endl;
+        return;
+    }
+    else if (this->midResults.size() == 1){
+        for(int i=0; i<this->selections.size(); i++){
+            int index=-1;
+            vector<uint64_t> * val;
+            uint64_t sum=0;
+            if (this->midResults.front().rels != NULL){
+                for (int k=0; k < this->midResults.front().rels->size(); k++){    
+                    if ( (*(this->midResults.front().rels))[k] == this->selections[i].rel){
+                        index=k;
+                        break;    
+                    }
+                }
+                if (index < 0){
+                    cerr << "Selection Relation doesnt exist in midResult";
+                    cout << endl;
+                    return;
+                }
+                
+                if (this->midResults.front().res->at(index).rowIds->size() == 0){
+                    cout << selections[i].rel << " : " << "NULL" << endl;
+                    continue;
+                }
+                val = fileArray.findColByRowIds(*(this->midResults.front().res->at(index).rowIds), this->selections[i].col, this->midResults.front().res->at(index).relPos);
+                if (val == NULL){
+                    cerr << "Error in findColByRowIds, vector is null" << endl;
+                    cout << endl;
+                    return;
+                }
+                for (uint64_t k=0; k < val->size(); k++){
+                    sum += (*val)[k];
+                }
+                delete(val);
+                cout << "rel: " << selections[i].rel << " ,col: " << this->selections[i].col << " ,sum: " << sum << endl;
+            }
+            else{
+                cerr << "No relations in mid result to print" << endl;
+                cout << endl;
+                return;
             }
         }
-        if (index < 0){
-            RelationResults res;
-            res.relPos = this->selections[i].rel;
-            res.rowIds = new vector<uint64_t>;
-            for (uint64_t k=0; k < fileArray.getRowNum(this->selections[i].rel); k++){
-                res.rowIds->push_back(k);
-            }
-            this->results.push_back(res);
-            index = results.size()-1;        
-        }            
-        if (this->results[index].rowIds->size() == 0){
-            cout << selections[i].rel << " : " << "NULL" << endl;
-            continue;
-        }
-        val = fileArray.findColByRowIds(*(this->results[index].rowIds), this->selections[i].col, this->results[index].relPos);
-        if (val == NULL){
-            cerr << "Error in findColByRowIds, vector is null" << endl;
-        }
-        
-        for (uint64_t k=0; k < val->size(); k++){
-            sum += (*val)[k];
-        }
-        delete(val);
-        cout << "rel: " << selections[i].rel << " ,col: " << this->selections[i].col << " ,sum: " << sum << endl;     
+    return;
+    }
+    else{
+        cout << endl;
+        return;
     }
 }
 
-void Parser::compute(FileArray & fileArray){
+
+
+
+
+
+
+
+void Parser::computeFilters(FileArray & fileArray){
     //filters first
     
     for (int i=0; i<this->filters.size(); i++){
         int index=-1;
-        for (int j=0; j<this->results.size(); j++){
-            if (this->results[j].relPos == this->filters[i].rel){
-                index=j;
+        
+        for (int j=0; j<this->midResults.size(); j++){
+            if (this->midResults[j].rels != NULL){
+                if ( (*(this->midResults[j].rels)).front() == this->filters[i].rel){
+                    index=j;
+                    break;    
+                }
             }
         }
         if (index < 0){
-            RelationResults res;
+            RelationResults res ;
             res.relPos = this->filters[i].rel;
             res.rowIds = new vector<uint64_t>;
             for (uint64_t k=0; k < fileArray.getRowNum(res.relPos); k++){
                 res.rowIds->push_back(k);
             }
-            this->results.push_back(res);
-            index = results.size()-1;        
+            
+            MidResult result;
+            result.res = new vector<RelationResults>;
+            result.res->push_back(res);
+            result.rels = new vector<int>;
+            result.rels->push_back(res.relPos);
+            
+            this->midResults.push_back(result);
+            index = midResults.size()-1;        
         }
         
         //CHECK IF MIDRESULT EMPTY
-        if ( this->results[index].rowIds->size() == 0){
+        if ( this->midResults[index].res->front().rowIds->size() == 0){
             // do nothing
             continue;
         }
@@ -89,7 +124,7 @@ void Parser::compute(FileArray & fileArray){
         if (this->filters[i].op == FilterInfo::FilterOperation::LESS){
             //NONE
             if(fileArray.getColMin(this->filters[i].rel, this->filters[i].col) >= this->filters[i].constant){
-                this->results[index].rowIds->clear();   //empty vector (constant complexity)
+                this->midResults[index].res->front().rowIds->clear();   //empty vector (constant complexity)
                 continue;
             }
             //ALL
@@ -101,7 +136,7 @@ void Parser::compute(FileArray & fileArray){
         if (this->filters[i].op == FilterInfo::FilterOperation::GREATER){
             //NONE
             if(fileArray.getColMax(this->filters[i].rel, this->filters[i].col) <= this->filters[i].constant){
-                this->results[index].rowIds->clear();   //empty vector (constant complexity)
+                this->midResults[index].res->front().rowIds->clear();   //empty vector (constant complexity)
                 continue;
             }
             //ALL
@@ -110,11 +145,16 @@ void Parser::compute(FileArray & fileArray){
                 continue;
             }
         }
-        filterResults( this->results[index], this->filters[i], fileArray);
+        filterResults( this->midResults[index].res->front(), this->filters[i], fileArray);
      
     }
     
 
+}
+
+
+void Parser::computeJoins(FileArray &fileArray){
+    return;
 }
 
 void Parser::optimize(FileArray & fileArray){
@@ -130,7 +170,10 @@ void Parser::computeQuery(FileArray & fileArray, string & line) {
     //rearange computations (optimize)
     this->optimize(fileArray);
     //do computations
-    this->compute(fileArray);
+    //compute Filters first
+    this->computeFilters(fileArray);
+    //compute Joins after
+    this->computeJoins(fileArray);
     //print results to std::out
     this->printResult(fileArray);
 }
