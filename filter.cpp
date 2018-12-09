@@ -322,3 +322,27 @@ void RadixHashJoin( RelationResults & results1, RelationResults & results2, Join
     results2.rowIds = joinedResults2;
 
 }
+
+void selfJoin( RelationResults & results, JoinInfo & join, FileArray & fileArray ){
+    vector<uint64_t> * val1, val2;
+    vector<uint64_t> * newRowIds = new vector<uint64_t>;
+    val1 = fileArray.findColByRowIds(*(results.rowIds), join.col1, join.rel1);
+    val2 = fileArray.findColByRowIds(*(results.rowIds), join.col2, join.rel2);
+
+    for (int i=0; i < results.rowIds->size(); i++){
+        if ((*val1)[i] == (*val2)[i]){
+            newRowIds->push_back((*results.rowIds)[i]);
+        }
+    }
+    delete(results.rowIds);
+    results.rowIds = newRowIds;
+    
+}
+
+void joinedRelJoin(){
+    return;
+}
+
+// void crossProduct(){
+//     return;
+// }

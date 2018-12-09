@@ -58,6 +58,12 @@ typedef struct RelationResults {
     vector<uint64_t> * rowIds;
 
 } RelationResults ;
+
+typedef struct MidResult {
+    vector<RelationResults> * res;
+    vector<int> * rels;
+    //...
+} MidResult;
  
 void filterResults( RelationResults & results, FilterInfo filter, FileArray & fileArray );
 
@@ -72,6 +78,7 @@ class Parser {
     vector<FilterInfo> filters;
     vector<JoinInfo> joins;
     //midreasult
+    vector<MidResult> midResults;
     vector<RelationResults> results;
     
 
