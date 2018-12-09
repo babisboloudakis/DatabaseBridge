@@ -154,7 +154,77 @@ void Parser::computeFilters(FileArray & fileArray){
 
 
 void Parser::computeJoins(FileArray &fileArray){
-    return;
+ 
+    // computer already sorted joins
+    for ( int joinIndex = 0; joinIndex < joins.size(); joinIndex++ ) {
+        // get rels to be joined
+        int leftRel = joins[joinIndex].rel1;
+        int rightRel = joins[joinIndex].rel2;
+        // if we join same relations
+        if ( leftRel == rightRel ) {
+            // SELF JOIN
+            continue;
+        }
+        // find midResult index for each rel
+        int index1 = -1, index2 = -1;
+        for ( int midIndex; midIndex < midResults.size(); midIndex++ ) {
+            // look for rels inside current midResults
+            for ( int relIndex = 0; relIndex < midResults[midIndex].rels->size(); relIndex++ ) {
+                if ( leftRel == midResults[midIndex].rels->at(relIndex) ) {
+                    index1 = midIndex;
+                }
+                if ( rightRel == midResults[midIndex].rels->at(relIndex) ) {
+                    index2 = midIndex;
+                }
+            }
+        }
+        // If our relations are on the same MidResult
+        if ( index1 == index2 && index1 != -1 ) {
+            // SAME REL JOIN
+            continue;
+        }
+        // if rel1 wasn't found, create midResult
+        if ( index1 == -1 ) {
+            // Create temporary result
+            RelationResults res ;
+            res.relPos = leftRel;
+            res.rowIds = new vector<uint64_t>;
+            for (uint64_t k=0; k < fileArray.getRowNum(res.relPos); k++){
+                res.rowIds->push_back(k);
+            }
+            // Create temp midResult
+            MidResult tempMid;
+            tempMid.res = new vector<RelationResults>;
+            tempMid.res->push_back(res);
+            tempMid.rels = new vector<int>;  
+            tempMid.rels->push_back(leftRel);
+            // Push new mid result into mid results
+            midResults.push_back(tempMid);
+            index1 = midResults.size() - 1;
+        }
+        // if rel2 wasn't found, create midResult
+        if ( index2 == -1 ) {
+            // Create temporary result
+            RelationResults res ;
+            res.relPos = rightRel;
+            res.rowIds = new vector<uint64_t>;
+            for (uint64_t k=0; k < fileArray.getRowNum(res.relPos); k++){
+                res.rowIds->push_back(k);
+            }
+            // Create temp midResult
+            MidResult tempMid;
+            tempMid.res = new vector<RelationResults>;
+            tempMid.res->push_back(res);
+            tempMid.rels = new vector<int>;  
+            tempMid.rels->push_back(rightRel);
+            // Push new mid result into mid results
+            midResults.push_back(tempMid);
+            index2 = midResults.size() - 1;
+        }
+        // In any other case, use Radix Hash Join
+        RadixHashJoin(midResults[index1],midResults[index2],joins[joinIndex],fileArray);
+    }
+ 
 }
 
 void Parser::optimize(FileArray & fileArray){
@@ -164,6 +234,7 @@ void Parser::optimize(FileArray & fileArray){
 
 void Parser::computeQuery(FileArray & fileArray, string & line) {
     //parse Query info
+    cout << "Parsing..." << endl;
     this->parseQuery(line);
     //debug
     this->printParseInfo();
@@ -171,10 +242,13 @@ void Parser::computeQuery(FileArray & fileArray, string & line) {
     this->optimize(fileArray);
     //do computations
     //compute Filters first
+    cout << "Filters..." << endl;
     this->computeFilters(fileArray);
     //compute Joins after
+    cout << "Joins..." << endl;
     this->computeJoins(fileArray);
     //print results to std::out
+    cout << "Printing" << endl;
     this->printResult(fileArray);
 }
 

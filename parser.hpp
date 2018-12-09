@@ -61,13 +61,13 @@ typedef struct RelationResults {
 
 typedef struct MidResult {
     vector<RelationResults> * res;
-    vector<int> * rels; 
+    vector<int> * rels;
     //...
 } MidResult;
  
 void filterResults( RelationResults & results, FilterInfo filter, FileArray & fileArray );
 
-void RadixHashJoin( RelationResults & results1, RelationResults & results2, JoinInfo & join, FileArray & fileArray );
+MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo & join, FileArray & fileArray );
 
 class Parser {
 

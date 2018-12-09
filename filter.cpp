@@ -375,25 +375,65 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
     return joinedMid;
 }
 
-// void selfJoin( RelationResults & results, JoinInfo & join, FileArray & fileArray ){
-//     vector<uint64_t> * val1, val2;
-//     vector<uint64_t> * newRowIds = new vector<uint64_t>;
-//     val1 = fileArray.findColByRowIds(*(results.rowIds), join.col1, join.rel1);
-//     val2 = fileArray.findColByRowIds(*(results.rowIds), join.col2, join.rel2);
+void selfJoin( RelationResults & results, JoinInfo & join, FileArray & fileArray ){
+    vector<uint64_t> * val1, *val2;
+    if(join.col1 == join.col2){
+        return;
+    }
+    vector<uint64_t> * newRowIds = new vector<uint64_t>;
+    val1 = fileArray.findColByRowIds(*(results.rowIds), join.col1, join.rel1);
+    val2 = fileArray.findColByRowIds(*(results.rowIds), join.col2, join.rel2);
 
-//     for (int i=0; i < results.rowIds->size(); i++){
-//         if ((*val1)[i] == (*val2)[i]){
-//             newRowIds->push_back((*results.rowIds)[i]);
-//         }
-//     }
-//     delete(results.rowIds);
-//     results.rowIds = newRowIds;
+    for (int i=0; i < results.rowIds->size(); i++){
+        if ((*val1)[i] == (*val2)[i]){
+            newRowIds->push_back((*results.rowIds)[i]);
+        }
+    }
+    delete(results.rowIds);
+    results.rowIds = newRowIds;
     
-// }
+}
 
-// void joinedRelJoin(){
-//     return;
-// }
+void joinedRelJoin(MidResult & results, JoinInfo & join, FileArray & fileArray ){
+    int index1;
+    int index2;
+    vector<uint64_t> * val1, *val2;
+    vector<RelationResults> * newRes = new vector<RelationResults>;
+    for(int i=0; i < results.rels->size(); i++){
+        RelationResults temp;
+        temp.relPos = results.rels->at(i);
+        temp.rowIds = new vector<uint64_t>;
+        newRes->push_back(temp);
+    }
+    for (int i=0; i<results.rels->size(); i++){
+        if ( results.rels->at(i) == join.rel1){
+            index1 = i;
+        }
+        if (results.rels->at(i) == join.rel2){
+            index2 = i;
+        }
+    }
+
+
+    val1 = fileArray.findColByRowIds(*(results.res->at(index1).rowIds), join.col1, join.rel1);
+    val2 = fileArray.findColByRowIds(*(results.res->at(index2).rowIds), join.col2, join.rel2);
+    for (int i=0; i < results.res->at(index1).rowIds->size(); i++){
+        if ((*val1)[i] == (*val2)[i]){
+            for (int j=0; j<results.rels->size(); j++){
+                newRes->at(j).rowIds->push_back(results.res->at(j).rowIds->at(i));
+            }
+        }
+    }
+
+    for (int j=0; j<results.rels->size(); j++){
+        delete (results.res->at(j).rowIds);
+    }
+    delete (results.res);
+    results.res = newRes;
+
+    
+    return;
+}
 
 // void crossProduct(){
 //     return;

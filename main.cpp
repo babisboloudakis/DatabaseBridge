@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
                 cout << "Error in findcol" << endl;
                 continue;
             }
-            cout << "column has first 3 values : "<< (*v)[0] << ", " << (*v)[1] << ", " << (*v)[2] << endl << endl;
+            cout << "column has first 3 values : "<< (*v)[0] << ", " << (*v)[1] << ", " << (*v)[2] << endl;
             
             cout << j << " column has statistics: ";
             cout << fileArray.getColMax(i,j) << " max, " ;
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
         // cout << "Just Got line : " << line << endl;
         // parser.parseQuery(line);
         // parser.printParseInfo();
-        // 0|0.1>5000|0.0 0.1 0.2
+        // 0 1|1.2=0.2|0.1 1.1
         parser.computeQuery(fileArray, line);
         
     }
