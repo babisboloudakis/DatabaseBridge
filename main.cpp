@@ -63,5 +63,6 @@ int main(int argc, char* argv[]) {
         parser.computeQuery(fileArray, line);
         
     }
+    cout << "Exiting..." << endl;
     return 0;
 }

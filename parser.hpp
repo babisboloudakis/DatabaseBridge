@@ -61,6 +61,8 @@ typedef struct RelationResults {
  
 void filterResults( RelationResults & results, FilterInfo filter, FileArray & fileArray );
 
+void RadixHashJoin( RelationResults & results1, RelationResults & results2, JoinInfo & join, FileArray & fileArray );
+
 class Parser {
 
     public:
@@ -77,9 +79,11 @@ class Parser {
     public:
     Parser(){}; 
     ~Parser(){
-        // for (int i=0; i < this->results.size(); i++){
-        //     delete(this->results[i].rowIds);
-        // }    
+        for (int i=0; i < this->results.size(); i++){
+            if (this->results[i].rowIds != NULL){
+                delete(this->results[i].rowIds);
+            }
+        }    
     }; //destry pointers
 
     //fnct -> compute(fileArray, string){ parseQuery , prakseis, putresult }
