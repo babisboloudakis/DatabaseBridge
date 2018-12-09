@@ -111,10 +111,10 @@ class FileArray {
 
             uint64_t row = *(uint64_t *)addr;
             addr += sizeof(row);
-            cout << "RowNum: " << row << endl;
+            // cout << "RowNum: " << row << endl;
             
             uint64_t col = *(uint64_t *)addr;
-            cout << "ColNum: " << col << endl;
+            // cout << "ColNum: " << col << endl;
             addr += sizeof(col);
             this->cells[i] = new Cell(fileName[i], col, row);
             
@@ -131,7 +131,7 @@ class FileArray {
                 //     myfile << *(uint64_t *)(addr + k*sizeof(uint64_t)) << endl;
                 // }
                 uint64_t data = *(uint64_t *)(addr + sizeof(uint64_t));
-                cout << j << " col second data is: " << data << endl;
+                // cout << j << " col second data is: " << data << endl;
                 addr += row*sizeof(uint64_t);        
             }
             this->computeStatistics(i);

@@ -76,14 +76,19 @@ class Parser {
 
     public:
     Parser(){}; 
-    ~Parser(){}; //destry pointers
+    ~Parser(){
+        // for (int i=0; i < this->results.size(); i++){
+        //     delete(this->results[i].rowIds);
+        // }    
+    }; //destry pointers
 
     //fnct -> compute(fileArray, string){ parseQuery , prakseis, putresult }
     void computeQuery(FileArray & fileArray, string & line);
     //private
     //fnct -> prakseis((min, max)fliters->midresults epilogh twn joins->joins diaxeirish mid result)
+    void optimize(FileArray & fileArray);
     void compute(FileArray & fileArray);
-    void printResult();
+    void printResult(FileArray & fileArray);
     //applyfiter(&RelationResults, col, &fileArray ) (vector[2],f)
     //applyjoin to diff()
     //apply join to same()
