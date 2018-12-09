@@ -1,4 +1,3 @@
-#include "filter.hpp"
 #include <iostream>
 #include "parser.hpp"
 #include <vector>
@@ -45,11 +44,11 @@ void filterResults( RelationResults & results, FilterInfo filter, FileArray & fi
 
 }
 
-int main ( void ) {
+// int main ( void ) {
 
-    string str = "0 2 4|0.1=1.2&1.0=2.1&0.1>3000|0.0 1.1";
-    cout << str << endl;
-    Parser parser;
-    parser.parseQuery(str);
-    parser.printParseInfo();
-}
+//     string str = "0 2 4|0.1=1.2&1.0=2.1&0.1>3000|0.0 1.1";
+//     cout << str << endl;
+//     Parser parser;
+//     parser.parseQuery(str);
+//     parser.printParseInfo();
+// }

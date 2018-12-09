@@ -22,45 +22,117 @@ static void splitPredicates(string& line, vector<string>& result) {
   }
 }
 
-void Parser::printResult(){
+void Parser::printResult(FileArray &fileArray){
     for(int i=0; i<this->selections.size(); i++){
+        int index=-1;
+        vector<uint64_t> * val;
+        uint64_t sum=0;
+        for (int j=0; j<this->results.size(); j++){
+            if (this->results[j].relPos == this->selections[i].rel){
+                index=j;
+            }
+        }
+        if (index < 0){
+            RelationResults res;
+            res.relPos = this->selections[i].rel;
+            res.rowIds = new vector<uint64_t>;
+            for (uint64_t k=0; k < fileArray.getRowNum(this->selections[i].rel); k++){
+                res.rowIds->push_back(k);
+            }
+            this->results.push_back(res);
+            index = results.size()-1;        
+        }            
+        if (this->results[index].rowIds->size() == 0){
+            cout << selections[i].rel << " : " << "NULL" << endl;
+            continue;
+        }
+        val = fileArray.findColByRowIds(*(this->results[index].rowIds), this->selections[i].col, this->results[index].relPos);
+        if (val == NULL){
+            cerr << "Error in findColByRowIds, vector is null" << endl;
+        }
         
-             
+        for (uint64_t k=0; k < val->size(); k++){
+            sum += (*val)[k];
+        }
+        delete(val);
+        cout << "rel: " << selections[i].rel << " ,col: " << this->selections[i].col << " ,sum: " << sum << endl;     
     }
 }
 
 void Parser::compute(FileArray & fileArray){
     //filters first
-    //if (this->filters.size()) {   //if not empty
-        for (int i=0; i<this->filters.size(); i++){
-            int index=-1;
-            for (int j=0; j<this->results.size(); j++){
-                if (this->results[j].relPos == this->filters[i].rel){
-                    index=j;
-                }
+    
+    for (int i=0; i<this->filters.size(); i++){
+        int index=-1;
+        for (int j=0; j<this->results.size(); j++){
+            if (this->results[j].relPos == this->filters[i].rel){
+                index=j;
             }
-            if (index < 0){
-                RelationResults res;
-                res.relPos = this->filters[i].rel;
-                res.rowIds = new vector<uint64_t>;
-                for (uint64_t k=0; k < fileArray.getRowNum(res.relPos); k++){
-                    res.rowIds->push_back(k);
-                }
-                this->results.emplace_back(res);
-                index = results.size()-1;        
-            }
-            
         }
-    //}        
+        if (index < 0){
+            RelationResults res;
+            res.relPos = this->filters[i].rel;
+            res.rowIds = new vector<uint64_t>;
+            for (uint64_t k=0; k < fileArray.getRowNum(res.relPos); k++){
+                res.rowIds->push_back(k);
+            }
+            this->results.push_back(res);
+            index = results.size()-1;        
+        }
+        
+        //CHECK IF MIDRESULT EMPTY
+        if ( this->results[index].rowIds->size() == 0){
+            // do nothing
+            continue;
+        }
+
+        if (this->filters[i].op == FilterInfo::FilterOperation::LESS){
+            //NONE
+            if(fileArray.getColMin(this->filters[i].rel, this->filters[i].col) >= this->filters[i].constant){
+                this->results[index].rowIds->clear();   //empty vector (constant complexity)
+                continue;
+            }
+            //ALL
+            if(fileArray.getColMax(this->filters[i].rel, this->filters[i].col) < this->filters[i].constant){
+                //do nothing
+                continue;
+            }
+        }
+        if (this->filters[i].op == FilterInfo::FilterOperation::GREATER){
+            //NONE
+            if(fileArray.getColMax(this->filters[i].rel, this->filters[i].col) <= this->filters[i].constant){
+                this->results[index].rowIds->clear();   //empty vector (constant complexity)
+                continue;
+            }
+            //ALL
+            if(fileArray.getColMin(this->filters[i].rel, this->filters[i].col) > this->filters[i].constant){
+                //do nothing
+                continue;
+            }
+        }
+        filterResults( this->results[index], this->filters[i], fileArray);
+     
+    }
+    
+
+}
+
+void Parser::optimize(FileArray & fileArray){
+    //do nothing for now
+    return;
 }
 
 void Parser::computeQuery(FileArray & fileArray, string & line) {
     //parse Query info
     this->parseQuery(line);
+    //debug
+    this->printParseInfo();
+    //rearange computations (optimize)
+    this->optimize(fileArray);
     //do computations
     this->compute(fileArray);
     //print results to std::out
-    this->printResult();
+    this->printResult(fileArray);
 }
 
 void Parser::parseRelCol ( string & rawPair ) { 

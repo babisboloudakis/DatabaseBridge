@@ -56,10 +56,12 @@ vector<uint64_t> * Cell::findColByRowIds (vector<uint64_t> &rowId, uint64_t col)
     vector<uint64_t> *p = new vector<uint64_t>;
     uint64_t * addr = this->array[col].pointer;
     for (int i=0; i<rowId.size(); i++){
-        (*p).push_back(*((rowId[i])*sizeof(uint64_t) + addr));
+        p->push_back(*(addr + rowId[i]));
     }
     return p;
 }
+
+
 
 uint64_t * Cell::getColPtr (uint64_t col){
     return this->array[col].pointer;
