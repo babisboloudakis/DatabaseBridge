@@ -253,11 +253,11 @@ void Parser::optimize(FileArray & fileArray){
         int temp;
         //select min = size1 + size2
         if (i == 0){
-            score =  ((size1 > size2) ? (size1 - size2) : (size2 - size1));
+            score = size1 + size2;
             index = 0;
         }
         else{
-            temp = ((size1 > size2) ? (size1 - size2) : (size2 - size1));
+            temp = size1 + size2;
             if  (temp < score){
                 score = temp;
                 index = i;
