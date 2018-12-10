@@ -4,26 +4,21 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
+
     vector <string> fileNames;
     string line;
-    // cin >> line;
-    // while (line != "Done"){
-    //     fileNames.push_back(line);
-    //     cin >> line;
-    // }
+    
     while (getline(cin, line)){
         if (line == "Done") break;
         fileNames.push_back(line);
     }
-    cout << "Printing ...." << endl;
     for (int i = 0; i< fileNames.size(); i++){
         cout << fileNames[i] << endl;
     }
     cout << endl;
 
     FileArray fileArray(fileNames, fileNames.size());
-    
-    // cout << "fileArray size: "<< fileArray.getSize() << endl ;
+    cout << "fileArray size: "<< fileArray.getSize() << endl ;
 
     for (int i=0; i < fileArray.getSize(); i++){
         cout << "File: " << i << endl;
@@ -40,8 +35,7 @@ int main(int argc, char* argv[]) {
                 cout << "Error in findcol" << endl;
                 continue;
             }
-            cout << "column has first 3 values : "<< (*v)[0] << ", " << (*v)[1] << ", " << (*v)[2] << endl;
-            
+            cout << "column has first 3 values : "<< (*v)[0] << ", " << (*v)[1] << ", " << (*v)[2] << endl << endl;
             cout << j << " column has statistics: ";
             cout << fileArray.getColMax(i,j) << " max, " ;
             cout << fileArray.getColMin(i,j) << " min, " ;
@@ -49,20 +43,15 @@ int main(int argc, char* argv[]) {
         }
         cout << endl;
     }
-    cout << "Done computing for all files" << endl;
     
-    Parser parser;
-    cout << "Insert Query..." << endl;
     while (getline(cin, line)) {
         if (line == "F") continue; // End of a batch
-        if (line == "Done") break;
-        // cout << "Just Got line : " << line << endl;
-        // parser.parseQuery(line);
-        // parser.printParseInfo();
-        // 0 1|1.2=0.2|0.1 1.1
+        if (line == "Done") break; // End of queries
+        // Create new parser to hold query info
+        Parser parser;
         parser.computeQuery(fileArray, line);
-        
     }
-    cout << "Exiting..." << endl;
+
     return 0;
+    
 }

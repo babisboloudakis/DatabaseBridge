@@ -47,7 +47,8 @@ void Parser::printResult(FileArray &fileArray){
                 }
                 
                 if (this->midResults.front().res->at(index).rowIds->size() == 0){
-                    cout << selections[i].rel << " : " << "NULL" << endl;
+                    // cout << selections[i].rel << " : " << "NULL" << endl;
+                    cout << "NULL ";
                     continue;
                 }
                 val = fileArray.findColByRowIds(*(this->midResults.front().res->at(index).rowIds), this->selections[i].col, this->midResults.front().res->at(index).relPos);
@@ -60,7 +61,8 @@ void Parser::printResult(FileArray &fileArray){
                     sum += (*val)[k];
                 }
                 delete(val);
-                cout << "rel: " << selections[i].rel << " ,col: " << this->selections[i].col << " ,sum: " << sum << endl;
+                // cout << "rel: " << selections[i].rel << " ,col: " << this->selections[i].col << " ,sum: " << sum << endl;
+                cout << sum << " ";
             }
             else{
                 cerr << "No relations in mid result to print" << endl;
@@ -68,7 +70,8 @@ void Parser::printResult(FileArray &fileArray){
                 return;
             }
         }
-    return;
+        cout << endl;
+        return;
     }
     else{
         cout << endl;
@@ -78,14 +81,9 @@ void Parser::printResult(FileArray &fileArray){
 
 
 
-
-
-
-
-
 void Parser::computeFilters(FileArray & fileArray){
+
     //filters first
-    
     for (int i=0; i<this->filters.size(); i++){
         int index=-1;
         
@@ -149,7 +147,6 @@ void Parser::computeFilters(FileArray & fileArray){
      
     }
     
-
 }
 
 
@@ -160,14 +157,9 @@ void Parser::computeJoins(FileArray &fileArray){
         // get rels to be joined
         int leftRel = joins[joinIndex].rel1;
         int rightRel = joins[joinIndex].rel2;
-        // if we join same relations
-        if ( leftRel == rightRel ) {
-            // SELF JOIN
-            continue;
-        }
         // find midResult index for each rel
         int index1 = -1, index2 = -1;
-        for ( int midIndex; midIndex < midResults.size(); midIndex++ ) {
+        for ( int midIndex = 0; midIndex < midResults.size(); midIndex++ ) {
             // look for rels inside current midResults
             for ( int relIndex = 0; relIndex < midResults[midIndex].rels->size(); relIndex++ ) {
                 if ( leftRel == midResults[midIndex].rels->at(relIndex) ) {
@@ -177,11 +169,6 @@ void Parser::computeJoins(FileArray &fileArray){
                     index2 = midIndex;
                 }
             }
-        }
-        // If our relations are on the same MidResult
-        if ( index1 == index2 && index1 != -1 ) {
-            // SAME REL JOIN
-            continue;
         }
         // if rel1 wasn't found, create midResult
         if ( index1 == -1 ) {
@@ -202,6 +189,12 @@ void Parser::computeJoins(FileArray &fileArray){
             midResults.push_back(tempMid);
             index1 = midResults.size() - 1;
         }
+        // if we join same relations
+        if ( leftRel == rightRel ) {
+            // SELF JOIN
+            joinedRelJoin(midResults[index1], joins[joinIndex], fileArray );
+            continue;
+        }
         // if rel2 wasn't found, create midResult
         if ( index2 == -1 ) {
             // Create temporary result
@@ -221,11 +214,28 @@ void Parser::computeJoins(FileArray &fileArray){
             midResults.push_back(tempMid);
             index2 = midResults.size() - 1;
         }
+        // If our relations are on the same MidResult
+        if ( index1 == index2 ) {
+            // SAME REL JOIN
+            joinedRelJoin(midResults[index1], joins[joinIndex],  fileArray );
+            continue;
+        }
         // In any other case, use Radix Hash Join
-        RadixHashJoin(midResults[index1],midResults[index2],joins[joinIndex],fileArray);
+        MidResult * FinalResults = RadixHashJoin(midResults[index1],midResults[index2],joins[joinIndex],fileArray);
+        // Erase previous mid results and push the new one
+        if ( index1 < index2 ) {
+            midResults.erase(midResults.begin()+index2);
+            midResults.erase(midResults.begin()+index1);
+        } else {
+            midResults.erase(midResults.begin()+index1);
+            midResults.erase(midResults.begin()+index2);
+        }
+        midResults.push_back( *FinalResults );
+        
     }
- 
+
 }
+
 
 void Parser::optimize(FileArray & fileArray){
     //do nothing for now
@@ -234,21 +244,17 @@ void Parser::optimize(FileArray & fileArray){
 
 void Parser::computeQuery(FileArray & fileArray, string & line) {
     //parse Query info
-    cout << "Parsing..." << endl;
     this->parseQuery(line);
     //debug
-    this->printParseInfo();
+    // this->printParseInfo();
     //rearange computations (optimize)
     this->optimize(fileArray);
     //do computations
     //compute Filters first
-    cout << "Filters..." << endl;
     this->computeFilters(fileArray);
     //compute Joins after
-    cout << "Joins..." << endl;
     this->computeJoins(fileArray);
     //print results to std::out
-    cout << "Printing" << endl;
     this->printResult(fileArray);
 }
 
