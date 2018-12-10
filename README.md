@@ -9,7 +9,7 @@
 - [Βελτιστοποίηση ερωτημάτων](https://github.com/babisboloudakis/DatabaseBridge#%CE%B2%CE%B5%CE%BB%CF%84%CE%B9%CF%83%CF%84%CE%BF%CF%80%CE%BF%CE%AF%CE%B7%CF%83%CE%B7-%CE%B5%CF%81%CF%89%CF%84%CE%B7%CE%BC%CE%AC%CF%84%CF%89%CE%BD)
 - [Οδηγίες Εκτέλεσης](https://github.com/babisboloudakis/DatabaseBridge#%CE%BF%CE%B4%CE%B7%CE%B3%CE%AF%CE%B5%CF%82-%CE%B5%CE%BA%CF%84%CE%AD%CE%BB%CE%B5%CF%83%CE%B7%CF%82)
 - [Tests](https://github.com/babisboloudakis/DatabaseBridge#tests)
-- [Hash Functions](https://github.com/babisboloudakis/DatabaseBridge#hash-functions)
+- [Hash Functions](https://github.com/babisboloudakis/DatabaseBridge#hash-functions-%CF%84%CE%B7%CF%82-radix-hash-join)
 
 # Σύντομη Περιγραφή
 Σκοπός του προγράμματος μας είναι η εκτέλεση της πράξης της σύζευξης (join) αλλά και του φίλτρου (filter) πάνω
