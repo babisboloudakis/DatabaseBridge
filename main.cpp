@@ -18,30 +18,28 @@ int main(int argc, char* argv[]) {
     cout << endl;
 
     FileArray fileArray(fileNames, fileNames.size());
-    cout << "fileArray size: "<< fileArray.getSize() << endl ;
 
     for (int i=0; i < fileArray.getSize(); i++){
-        cout << "File: " << i << endl;
         if(fileArray.computeStatistics(i)){
             cerr << "Error in computeStatitics in " << i << " file" << endl;
         }
-        for (int j=0; j < fileArray.getColNum(i); j++){
-            vector<uint64_t> r;
-            for (uint64_t k=0; k<fileArray.getRowNum(i); k++){
-                r.push_back(k);
-            }
-            vector<uint64_t> * v = fileArray.findColByRowIds(r, j, i);
-            if(v == NULL){
-                cout << "Error in findcol" << endl;
-                continue;
-            }
-            cout << "column has first 3 values : "<< (*v)[0] << ", " << (*v)[1] << ", " << (*v)[2] << endl << endl;
-            cout << j << " column has statistics: ";
-            cout << fileArray.getColMax(i,j) << " max, " ;
-            cout << fileArray.getColMin(i,j) << " min, " ;
-            cout << fileArray.getColUniqueNum(i,j) << " uniqueNum" << endl;
-        }
-        cout << endl;
+        // for (int j=0; j < fileArray.getColNum(i); j++){
+        //     vector<uint64_t> r;
+        //     for (uint64_t k=0; k<fileArray.getRowNum(i); k++){
+        //         r.push_back(k);
+        //     }
+        //     vector<uint64_t> * v = fileArray.findColByRowIds(r, j, i);
+        //     if(v == NULL){
+        //         cout << "Error in findcol" << endl;
+        //         continue;
+        //     }
+        //     cout << "column has first 3 values : "<< (*v)[0] << ", " << (*v)[1] << ", " << (*v)[2] << endl << endl;
+        //     cout << j << " column has statistics: ";
+        //     cout << fileArray.getColMax(i,j) << " max, " ;
+        //     cout << fileArray.getColMin(i,j) << " min, " ;
+        //     cout << fileArray.getColUniqueNum(i,j) << " uniqueNum" << endl;
+        // }
+        // cout << endl;
     }
     
     while (getline(cin, line)) {
