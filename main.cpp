@@ -35,22 +35,23 @@ int main(int argc, char* argv[]) {
                 cout << "Error in findcol" << endl;
                 continue;
             }
-            
+            cout << "column has first 3 values : "<< (*v)[0] << ", " << (*v)[1] << ", " << (*v)[2] << endl << endl;
+            cout << j << " column has statistics: ";
+            cout << fileArray.getColMax(i,j) << " max, " ;
+            cout << fileArray.getColMin(i,j) << " min, " ;
+            cout << fileArray.getColUniqueNum(i,j) << " uniqueNum" << endl;
         }
         cout << endl;
     }
     
     while (getline(cin, line)) {
         if (line == "F") continue; // End of a batch
-        if (line == "Done") break;
-        // cout << "Just Got line : " << line << endl;
-        // parser.parseQuery(line);
-        // parser.printParseInfo();
-        // 0 1|1.2=0.2|0.1 1.1
+        if (line == "Done") break; // End of queries
+        // Create new parser to hold query info
         Parser parser;
         parser.computeQuery(fileArray, line);
-        
     }
-    cout << "Exiting..." << endl;
+
     return 0;
+    
 }
