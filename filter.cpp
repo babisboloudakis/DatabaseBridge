@@ -55,6 +55,13 @@ typedef struct package {
     uint64_t key;
     uint64_t payload;
     int index;
+
+    inline package operator=(package a) {
+        key=a.key;
+        payload=a.payload;
+        index=a.index;
+        return a;
+    }
 } package;
 
 /**
@@ -101,24 +108,23 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
     MidResult * joinedMid = new MidResult;
     joinedMid->rels = new vector<int>;
     joinedMid->res = new vector<RelationResults>;
+
+    // Initialize relations in new mid result
     for ( int i = 0; i < results1.rels->size(); i++ ) {
         joinedMid->rels->push_back( results1.rels->at(i) );
     }
-
     for ( int i = 0; i < results2.rels->size(); i++ ) {
         joinedMid->rels->push_back( results2.rels->at(i) );
     }
-    
+    // Initialize relation into new mid result
     for ( int i = 0; i < joinedMid->rels->size(); i++ ) {
         RelationResults relation;
         relation.relPos = joinedMid->rels->at(i);
         relation.rowIds = new vector<uint64_t>;
         joinedMid->res->push_back(relation);
-        // joinedMid->res->at(i).relPos = joinedMid->rels->at(i);
-        // joinedMid->res->at(i).rowIds = new vector<uint64_t>;
     }
 
-    // Use the two vector to create relations structs
+    // Use the two vectors to create relations structs
     relation relR;
     relR.num_tuples = results1.res->at(index1).rowIds->size();
     relR.tuples = new package[relR.num_tuples];
@@ -126,7 +132,7 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
     for( int i = 0; i < relR.num_tuples; i++ ) {
         relR.tuples[i].key = results1.res->at(index1).rowIds->at(i);
         relR.tuples[i].index = i;
-        relR.tuples[i].payload = (*values1)[i];
+        relR.tuples[i].payload = values1->at(i);
     }
 
     // Use the two vector to create relations structs
@@ -137,7 +143,7 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
     for( int i = 0; i < relS.num_tuples; i++ ) {
         relS.tuples[i].key = results2.res->at(index2).rowIds->at(i);
         relS.tuples[i].index = i;
-        relS.tuples[i].payload = (*values2)[i];
+        relS.tuples[i].payload = values2->at(i);
     }
 
 
@@ -211,7 +217,7 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
         uint64_t payload = S[i].payload; // payload to write
         uint64_t bucket = HashFunction1(payload,n); // bucket for that payload
 		St[ psumS[bucket] ].key = S[i].key;
-        St[ psumR[bucket] ].index = S[i].index; // INDEX
+        St[ psumS[bucket] ].index = S[i].index; // INDEX
 		St[ psumS[bucket]++ ].payload = S[i].payload; 
     }
 
@@ -230,12 +236,11 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
         package  * bucketS = new package[histS[temp]];
 
         for (int i = 0; i < histR[temp]; i++){
-            bucketR[i] = Rt[i + offsetR];	
+            bucketR[i] = Rt[i + offsetR];
         }
         for (int i = 0; i < histS[temp]; i++){
             bucketS[i] = St[i + offsetS];	
         }
-
         //initialize bucketArray
         uint64_t* bucketArray = new uint64_t[PRIME];
         for (int i = 0; i < PRIME; i++){
@@ -264,9 +269,9 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
                                 joinedMid->res->at(k).rowIds->push_back( results1.res->at(k).rowIds->at(ind1) );
                             }
                             else {
-                                joinedMid->res->at(k).rowIds->push_back( results2.res->at(k - results1.rels->size() ).rowIds->at(ind2) );
+                                joinedMid->res->at(k).rowIds->push_back( results2.res->at(k - results1.rels->size()).rowIds->at(ind2) );
                             }
-                        }
+                        }                       
                     }
                     //go to next
                     while (chain[last-1] !=0){
@@ -317,6 +322,7 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
                                 joinedMid->res->at(k).rowIds->push_back( results2.res->at(k - results1.rels->size()).rowIds->at(ind2) );
                             }
                         }
+                        
                     }
                     //go to next
                     while (chain[last-1] !=0){
@@ -377,24 +383,6 @@ MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo 
     return joinedMid;
 }
 
-void selfJoin( RelationResults & results, JoinInfo & join, FileArray & fileArray ){
-    vector<uint64_t> * val1, *val2;
-    if(join.col1 == join.col2){
-        return;
-    }
-    vector<uint64_t> * newRowIds = new vector<uint64_t>;
-    val1 = fileArray.findColByRowIds(*(results.rowIds), join.col1, join.rel1);
-    val2 = fileArray.findColByRowIds(*(results.rowIds), join.col2, join.rel2);
-
-    for (int i=0; i < results.rowIds->size(); i++){
-        if ((*val1)[i] == (*val2)[i]){
-            newRowIds->push_back((*results.rowIds)[i]);
-        }
-    }
-    delete(results.rowIds);
-    results.rowIds = newRowIds;
-    
-}
 
 void joinedRelJoin(MidResult & results, JoinInfo & join, FileArray & fileArray ){
     int index1;
@@ -416,7 +404,6 @@ void joinedRelJoin(MidResult & results, JoinInfo & join, FileArray & fileArray )
         }
     }
 
-
     val1 = fileArray.findColByRowIds(*(results.res->at(index1).rowIds), join.col1, join.rel1);
     val2 = fileArray.findColByRowIds(*(results.res->at(index2).rowIds), join.col2, join.rel2);
     for (int i=0; i < results.res->at(index1).rowIds->size(); i++){
@@ -432,7 +419,6 @@ void joinedRelJoin(MidResult & results, JoinInfo & join, FileArray & fileArray )
     }
     delete (results.res);
     results.res = newRes;
-
     
     return;
 }

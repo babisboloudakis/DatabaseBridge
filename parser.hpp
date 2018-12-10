@@ -66,7 +66,7 @@ typedef struct MidResult {
 } MidResult;
  
 void filterResults( RelationResults & results, FilterInfo filter, FileArray & fileArray );
-
+void joinedRelJoin(MidResult & results, JoinInfo & join, FileArray & fileArray );
 MidResult * RadixHashJoin( MidResult & results1, MidResult & results2, JoinInfo & join, FileArray & fileArray );
 
 class Parser {
