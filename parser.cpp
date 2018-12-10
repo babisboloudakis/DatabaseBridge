@@ -238,7 +238,42 @@ void Parser::computeJoins(FileArray &fileArray){
 
 
 void Parser::optimize(FileArray & fileArray){
-    //do nothing for now
+    //optimize Filters
+    int score; //min?
+    int index;
+    for(int i=0; i<this->joins.size(); i++){
+        uint64_t min1 = fileArray.getColMin(this->joins[i].rel1, this->joins[i].col1);
+        uint64_t max1 = fileArray.getColMax(this->joins[i].rel1, this->joins[i].col1);
+        uint64_t min2 = fileArray.getColMin(this->joins[i].rel2, this->joins[i].col2);
+        uint64_t max2 = fileArray.getColMax(this->joins[i].rel2, this->joins[i].col2);
+        uint64_t uniqueNum1 = fileArray.getColUniqueNum(this->joins[i].rel1, this->joins[i].col1);
+        uint64_t uniqueNum2 = fileArray.getColUniqueNum(this->joins[i].rel2, this->joins[i].col2);
+        uint64_t size1 = fileArray.getRowNum(this->joins[i].rel1);
+        uint64_t size2 = fileArray.getRowNum(this->joins[i].rel2);
+        int temp;
+        //select min = size1 + size2
+        if (i == 0){
+            score =  ((size1 > size2) ? (size1 - size2) : (size2 - size1));
+            index = 0;
+        }
+        else{
+            temp = ((size1 > size2) ? (size1 - size2) : (size2 - size1));
+            if  (temp < score){
+                score = temp;
+                index = i;
+            }
+        }
+        //MIN 1 > MAX 2 || MIN 2 > MAX 1 => NULL
+        if (min1 > max2 || min2 > max1){
+            score = 0;
+            index = i;
+        }
+        
+    }
+    JoinInfo join = this->joins.at(index);
+    this->joins.erase(this->joins.begin() + index);
+    this->joins.insert(this->joins.begin(), join);
+    
     return;
 }
 

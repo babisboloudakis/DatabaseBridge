@@ -5,7 +5,7 @@
 #include <cstring>
 
 #define BUFFERSIZE 1048576 // 1024 * 1024 = 1 MB
-#define PRIME 7 // prime number used in HashFunction2
+#define PRIME 7 // prime number used in HashFunction2 
 
 using namespace std;
 
@@ -388,6 +388,9 @@ void joinedRelJoin(MidResult & results, JoinInfo & join, FileArray & fileArray )
     int index1;
     int index2;
     vector<uint64_t> * val1, *val2;
+    if((join.rel1 == join.rel2) && (join.col1 == join.col2)){
+        return;
+    }
     vector<RelationResults> * newRes = new vector<RelationResults>;
     for(int i=0; i < results.rels->size(); i++){
         RelationResults temp;
@@ -406,6 +409,7 @@ void joinedRelJoin(MidResult & results, JoinInfo & join, FileArray & fileArray )
 
     val1 = fileArray.findColByRowIds(*(results.res->at(index1).rowIds), join.col1, join.rel1);
     val2 = fileArray.findColByRowIds(*(results.res->at(index2).rowIds), join.col2, join.rel2);
+    
     for (int i=0; i < results.res->at(index1).rowIds->size(); i++){
         if ((*val1)[i] == (*val2)[i]){
             for (int j=0; j<results.rels->size(); j++){
