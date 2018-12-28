@@ -1,5 +1,5 @@
 #include <iostream>
-#include "parser.hpp"
+#include "query.hpp"
 
 using namespace std;
 
@@ -46,8 +46,8 @@ int main(int argc, char* argv[]) {
         if (line == "F") continue; // End of a batch
         if (line == "Done") break; // End of queries
         // Create new parser to hold query info
-        Parser parser;
-        parser.computeQuery(fileArray, line);
+        Query query;
+        query.computeQuery(fileArray, line);
     }
 
     return 0;
