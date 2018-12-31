@@ -1,4 +1,4 @@
-#include "join.hpp"
+#include "headers/join.hpp"
 
 // Returns the value of the n less significant bits of a payload
 int HashFunction1( uint64_t payload, int n ) {

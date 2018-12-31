@@ -1,4 +1,4 @@
-#include "query.hpp"
+#include "headers/query.hpp"
 #include <sstream>
 
 using namespace std;
