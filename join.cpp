@@ -64,16 +64,15 @@ MidResult * Join::join( MidResult & results1, MidResult & results2, JoinInfo & j
         relS.tuples[i].payload = values2->at(i);
     }
 
-
     // ----------------
-    // |  FIRST PART  |
+    // |  FIRST PART - HISTOGRAMS |
     // ----------------
     // Get the size of each relation
     int Rn = relR.num_tuples;
     int Sn = relS.num_tuples;
     // Get the relationship arrays
     package * R = relR.tuples;
-    package * S = relS.tuples;
+    package * S = relS.tuples; 
     // Also create the two new arrays
     package * Rt = new package[Rn];
     package * St = new package[Sn];
