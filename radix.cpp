@@ -4,7 +4,7 @@
 
 #define BUFFERSIZE 1048576 // 1024 * 1024 = 1 MB
 #define PRIME 7 // prime number used in HashFunction2
-
+ 
 using namespace std;
 
 /** Type definition for a tuple */
