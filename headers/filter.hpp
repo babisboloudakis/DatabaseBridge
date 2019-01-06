@@ -22,5 +22,6 @@ class Filter{
     ~Filter(){};
 
     void filter( RelationResults & results, FilterInfo filter, FileArray & fileArray );
+    void filter( MidResult & results, FilterInfo & filter, FileArray & fileArray);
 };
 
