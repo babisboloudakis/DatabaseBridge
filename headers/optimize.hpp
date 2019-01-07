@@ -21,10 +21,10 @@ typedef struct Stats {
 
 } Stats;
 
-typedef struct relInfo {
+typedef struct RelInfo {
     int rel;
-    vector<Stats> * relStats;
-} relInfo;
+    vector<Stats> relStats;
+} RelInfo;
 
 
 
@@ -32,11 +32,23 @@ class Optimize{
     public:
 
     int relcnt;
-    vector<relInfo> rels;
+    vector<RelInfo> rels;
 
-    Optimize(int relcnt, FilterInfo & filter) : relcnt(relcnt){
-
+    Optimize(){
+        this->relcnt = 0;
     };
+    
+    Optimize(int relcnt, vector<FilterInfo> & filters) : relcnt(relcnt){
+        
+    };
+    
+    uint64_t cost(FilterInfo filter, vector<RelInfo> rels);
+
+    uint64_t cost(JoinInfo join, vector<RelInfo> rels);
+
+    //uint64_t cost(SelfInfo filter);
+
+
     ~Optimize(){};
 
     void optimizeQuery(FileArray & fileArray, Parser & parser);
