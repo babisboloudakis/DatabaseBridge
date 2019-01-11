@@ -27,29 +27,46 @@ typedef struct RelInfo {
 } RelInfo;
 
 
+typedef struct MapData {
+    vector<JoinInfo> joins;
+    vector<RelInfo> joinedRels;
+    uint64_t cost;
+} MapData;
+
 
 class Optimize{
     public:
 
     int relcnt;
     vector<RelInfo> rels;
+    // vector<SelfInfo> * selfJoin;
+    vector<MapData> map;  
 
     Optimize(){
         this->relcnt = 0;
     };
     
-    Optimize(int relcnt, vector<FilterInfo> & filters) : relcnt(relcnt){
+    // Optimize(int relcnt, vector<FilterInfo> & filters) : relcnt(relcnt){
         
-    };
-    
-    uint64_t cost(FilterInfo filter, vector<RelInfo> rels);
-
-    uint64_t cost(JoinInfo join, vector<RelInfo> rels);
-
-    //uint64_t cost(SelfInfo filter);
-
+    // };
 
     ~Optimize(){};
+    
+    uint64_t cost(FilterInfo & filter, RelInfo & relIn);
+
+    uint64_t cost(FilterInfo & filter, vector<RelInfo> & rels);
+
+    uint64_t cost(JoinInfo & join, vector<RelInfo> & rels1, vector<RelInfo> & rels2);
+
+    //uint64_t cost(SelfInfo filter);
+    
+    void getRelStats(FileArray & fileArray, Parser & parser);
+
+    void updateStats(vector<FilterInfo> & filters);
+
+    void optimizeJoins(vector<JoinInfo> & joins);
+
+    // void Optimize::updateStats(vector<SelfInfo> & joins);
 
     void optimizeQuery(FileArray & fileArray, Parser & parser);
 };

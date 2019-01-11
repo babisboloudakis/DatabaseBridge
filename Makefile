@@ -11,6 +11,9 @@ run: default
 small: default
 	@time ./main < input.txt
 
+test: default
+	@./main < test.txt
+
 main.o: main.cpp
 	@g++ -c main.cpp $(PARAMS)
 
