@@ -15,6 +15,10 @@ uint64_t Optimize::cost(FilterInfo & filter, RelInfo & relIn){
                 for (int j=0; j < relIn.relStats.size(); j++){ //find col
                     if ( j == filter.col){ //cols are ordered
                         colPos = j;
+                        //check if null
+                        if (relIn.relStats.at(j).size == 0){
+                            return 0;
+                        }
                         //boundaries check
                         if (relIn.relStats.at(j).max < val){  // all
                             val = relIn.relStats.at(j).max;
@@ -52,10 +56,86 @@ uint64_t Optimize::cost(FilterInfo & filter, RelInfo & relIn){
                 
                 
             case FilterInfo::FilterOperation::GREATER:
-                //
+                for (int j=0; j < relIn.relStats.size(); j++){ //find col
+                    if ( j == filter.col){ //cols are ordered
+                        colPos = j;
+                        //check if null
+                        if (relIn.relStats.at(j).size == 0){
+                            return 0;
+                        }
+                        //boundaries check
+                        if (relIn.relStats.at(j).min > val){  // all
+                            val = relIn.relStats.at(j).min;
+                        }
+                        else if (relIn.relStats.at(j).max < val){ //size = 0 
+                            for (int n=0; n < relIn.relStats.size(); n++){
+                                relIn.relStats.at(n).min = 0;
+                                relIn.relStats.at(n).size = 0;
+                                relIn.relStats.at(n).distinct = 0;
+                                relIn.relStats.at(n).max = 0;
+                            }
+                            return 0;
+                        }
+                        colSize = relIn.relStats.at(j).size;
+                        relIn.relStats.at(j).size = ((relIn.relStats.at(j).max - val) / (relIn.relStats.at(j).max - relIn.relStats.at(j).min) * relIn.relStats.at(j).size);
+                        relIn.relStats.at(j).distinct = ((relIn.relStats.at(j).max - val) / (relIn.relStats.at(j).max - relIn.relStats.at(j).min) * relIn.relStats.at(j).distinct);
+                        relIn.relStats.at(j).min = val;
+                        break;
+                    }
+                    else{
+                        continue;
+                    }  
+                }
+                //update other col stats
+                for (int j=0; j < relIn.relStats.size(); j++){
+                    if ( j == filter.col){ //already updated
+                        continue; 
+                    }
+                    else{   //for other cols
+                        relIn.relStats.at(j).distinct = relIn.relStats.at(j).distinct * (1 - (uint64_t)pow(1 - (relIn.relStats.at(colPos).size / colSize), relIn.relStats.at(j).size / relIn.relStats.at(j).distinct));
+                        relIn.relStats.at(j).size = relIn.relStats.at(colPos).size;
+                    }
+                }
                 break;
             case FilterInfo::FilterOperation::EQUAL:
-                //
+                for (int j=0; j < relIn.relStats.size(); j++){ //find col
+                    if ( j == filter.col){ //cols are ordered
+                        colPos = j;
+                        //check if null
+                        if (relIn.relStats.at(j).size == 0){
+                            return 0;
+                        }
+                        //boundaries check
+                        if (relIn.relStats.at(j).min > val || relIn.relStats.at(j).max < val){ //size = 0 
+                            for (int n=0; n < relIn.relStats.size(); n++){
+                                relIn.relStats.at(n).min = 0;
+                                relIn.relStats.at(n).size = 0;
+                                relIn.relStats.at(n).distinct = 0;
+                                relIn.relStats.at(n).max = 0;
+                            }
+                            return 0;
+                        }
+                        colSize = relIn.relStats.at(j).size;
+                        relIn.relStats.at(j).size = relIn.relStats.at(j).size/relIn.relStats.at(j).distinct;
+                        relIn.relStats.at(j).distinct = 1;
+                        relIn.relStats.at(j).max = val;
+                        relIn.relStats.at(j).min = val;
+                        break;
+                    }
+                    else{
+                        continue;
+                    }  
+                }
+                //update other col stats
+                for (int j=0; j < relIn.relStats.size(); j++){
+                    if ( j == filter.col){ //already updated
+                        continue; 
+                    }
+                    else{   //for other cols
+                        relIn.relStats.at(j).distinct = relIn.relStats.at(j).distinct * (1 - (uint64_t)pow(1 - (relIn.relStats.at(colPos).size / colSize), relIn.relStats.at(j).size / relIn.relStats.at(j).distinct));
+                        relIn.relStats.at(j).size = relIn.relStats.at(colPos).size;
+                    }
+                }
                 break;
         }   
 }
@@ -76,6 +156,10 @@ uint64_t Optimize::cost(FilterInfo & filter, vector<RelInfo> & rels){
                             
                             if ( j == filter.col){ //cols are ordered
                                 colPos = j;
+                                //check if null
+                                if (rels.at(i).relStats.at(j).size == 0){
+                                    return 0;
+                                }
                                 //boundaries check
                                 if (rels.at(i).relStats.at(j).max < val){  // all
                                     val = rels.at(i).relStats.at(j).max;
