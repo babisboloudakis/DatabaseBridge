@@ -7,8 +7,9 @@ typedef struct SelectInfo {
     // struct that contains info for select, relation.col
     int rel;
     uint64_t col;
+    int index;
     // Struct constructor
-    SelectInfo(int rel, uint64_t col) : rel(rel), col(col) {};
+    SelectInfo(int rel, uint64_t col, int index) : rel(rel), col(col), index(index) {};
 
 } SelectInfo;
 

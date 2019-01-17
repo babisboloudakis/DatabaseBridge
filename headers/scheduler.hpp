@@ -14,14 +14,14 @@ class Job {
     // Pure virtual method, should be implemented by all sub-classes
     virtual void execute() = 0;
     
-}
+};
 
 class HistJob : public Job {
 
     public:
     // thread histogram task 
     void execute();
-}
+};
 
 // Definition of thread function
 void* threadFunction();

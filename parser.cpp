@@ -26,7 +26,7 @@ void Parser::parseRelCol ( string & rawPair ) {
     vector<string> words;
     // Split string into words
     splitString(rawPair,words,'.');
-    selections.emplace_back( SelectInfo( relations[stoul(words[0])] , stoul(words[1]) ) );
+    selections.emplace_back( SelectInfo( relations[stoul(words[0])] , stoul(words[1]), stoul(words[0]) ) );
 }
 
 void Parser::parseRelations( string & rawSelections ) {
@@ -44,7 +44,7 @@ SelectInfo Parser::parsePair ( string & rawPair ) {
     vector<string> words;
     // Split string into words
     splitString(rawPair,words,'.');
-    return SelectInfo( stoul(words[0]) , stoul(words[1]) );
+    return SelectInfo( relations[stoul(words[0])] , stoul(words[1]), stoul(words[0]) );
 }
 
 inline static bool isConstant(string& raw) { return raw.find('.')==string::npos; }
@@ -58,17 +58,17 @@ void Parser::parsePredicate(string& rawPredicate) {
     if ( isConstant(preds[1]) ) { 
         // filter operation
         char compType=rawPredicate[preds[0].size()];
-        filters.emplace_back( FilterInfo( relations[left.rel], left.col, stoul(preds[1]), FilterInfo::FilterOperation(compType), left.rel ) );
+        filters.emplace_back( FilterInfo( left.rel, left.col, stoul(preds[1]), FilterInfo::FilterOperation(compType), left.index ) );
     } else { 
         // Join operation
         SelectInfo right = parsePair(preds[1]);
         // Join can either be normal join or self join. We store them seperately.
-        if ( left.rel == right.rel ) {
+        if ( left.index == right.index ) {
             // Self Join.
-            selfs.emplace_back( SelfInfo( relations[left.rel], left.col, right.col, left.rel ) );
+            selfs.emplace_back( SelfInfo( left.rel, left.col, right.col, left.index ) );
         } else {
             // Regular Join.
-            joins.emplace_back( JoinInfo( relations[left.rel], left.col, relations[right.rel], right.col, left.rel, right.rel ) );
+            joins.emplace_back( JoinInfo( left.rel, left.col, right.rel, right.col, left.index, right.index ) );
         }
     }
 
