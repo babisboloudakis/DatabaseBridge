@@ -53,13 +53,23 @@ void Parser::parsePredicate(string& rawPredicate) {
 
     vector<string> preds;
     splitPredicates(rawPredicate, preds);
+    // Read first pair.
     SelectInfo left = parsePair(preds[0]);
-    if ( isConstant(preds[1]) ) { // filter operation
+    if ( isConstant(preds[1]) ) { 
+        // filter operation
         char compType=rawPredicate[preds[0].size()];
-        filters.emplace_back( FilterInfo( relations[left.rel], left.col, stoul(preds[1]), FilterInfo::FilterOperation(compType) ) );
-    } else { // Join operation
+        filters.emplace_back( FilterInfo( relations[left.rel], left.col, stoul(preds[1]), FilterInfo::FilterOperation(compType), left.rel ) );
+    } else { 
+        // Join operation
         SelectInfo right = parsePair(preds[1]);
-        joins.emplace_back( JoinInfo( relations[left.rel], left.col, relations[right.rel], right.col ) );
+        // Join can either be normal join or self join. We store them seperately.
+        if ( left.rel == right.rel ) {
+            // Self Join.
+            selfs.emplace_back( SelfInfo( relations[left.rel], left.col, right.col, left.rel ) );
+        } else {
+            // Regular Join.
+            joins.emplace_back( JoinInfo( relations[left.rel], left.col, relations[right.rel], right.col, left.rel, right.rel ) );
+        }
     }
 
 }
@@ -105,12 +115,17 @@ void Parser::printParseInfo() {
 
     cout << "Filters" << endl;
     for ( int i = 0; i < filters.size(); i++ ) {
-        cout << '\t' << filters[i].rel << '\t' << filters[i].col << '\t' << (char)filters[i].op << '\t' << filters[i].constant << endl;
+        cout << '\t' << filters[i].rel << '\t' << filters[i].col << '\t' << (char)filters[i].op << '\t' << filters[i].constant << '\t' <<  filters[i].index <<  endl;
     }
 
     cout << "Joins" << endl;
     for ( int i = 0; i < joins.size(); i++ ) {
-        cout << '\t' << joins[i].rel1 << '\t' << joins[i].col1 << '\t' << joins[i].rel2 << '\t' << joins[i].col2 << endl;
+        cout << '\t' << joins[i].rel1 << '\t' << joins[i].col1 << '\t' << joins[i].rel2 << '\t' << joins[i].col2 << joins[i].index1 << '\t' << joins[i].index2 << endl;
+    }
+
+    cout << "Selfs" << endl;
+    for (int i = 0; i < selfs.size(); i++) {
+        cout << '\t' << selfs[i].rel << '\t' << selfs[i].col1 << '\t' << selfs[i].col2 << '\t' <<  selfs[i].index <<  endl;
     }
 
     cout << "Projections" << endl;

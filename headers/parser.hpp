@@ -19,6 +19,7 @@ class Parser{
     vector<SelectInfo> selections;
     vector<FilterInfo> filters;
     vector<JoinInfo> joins;
+    vector<SelfInfo> selfs;
     
     Parser(){};
     ~Parser(){};
