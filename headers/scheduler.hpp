@@ -3,11 +3,11 @@
 #include <mutex>
 #include <condition_variable>
 #include <iostream>
-#include "headers/join.hpp"
+#include "join.hpp"
 
 using namespace std;
 
-#define THREAD_NUMBER 3
+#define THREAD_NUMBER 3 
 
 // Abstract class, should be inherited to create a variety of jobs
 class Job {

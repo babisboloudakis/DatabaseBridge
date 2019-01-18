@@ -249,14 +249,14 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
     {
 
         //initialize bucket arrays
-        package *bucketR = new package[histR[temp]];
-        package *bucketS = new package[histS[temp]];
+        package *bucketR = new package[HistogramR[temp]];
+        package *bucketS = new package[HistogramS[temp]];
 
-        for (int i = 0; i < histR[temp]; i++)
+        for (int i = 0; i < HistogramR[temp]; i++)
         {
             bucketR[i] = Rt[i + offsetR];
         }
-        for (int i = 0; i < histS[temp]; i++)
+        for (int i = 0; i < HistogramS[temp]; i++)
         {
             bucketS[i] = St[i + offsetS];
         }
@@ -268,10 +268,10 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
         }
         uint64_t last;
         //select smallest bucket
-        if (histR[temp] <= histS[temp])
+        if (HistogramR[temp] <= HistogramS[temp])
         {
-            uint64_t *chain = new uint64_t[histR[temp]];
-            for (int i = 0; i < histR[temp]; i++)
+            uint64_t *chain = new uint64_t[HistogramR[temp]];
+            for (int i = 0; i < HistogramR[temp]; i++)
             {
                 uint64_t bucket = HashFunction2(bucketR[i].payload); // bucket for that payload
                 last = bucketArray[bucket];
@@ -279,7 +279,7 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
                 chain[i] = last;
             }
             //go to other bucket
-            for (int i = 0; i < histS[temp]; i++)
+            for (int i = 0; i < HistogramS[temp]; i++)
             {
                 uint64_t bucket = HashFunction2(bucketS[i].payload); // bucket for that payload
                 if ((last = bucketArray[bucket]) != 0)
@@ -333,8 +333,8 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
         }
         else
         {
-            uint64_t *chain = new uint64_t[histS[temp]];
-            for (int i = 0; i < histS[temp]; i++)
+            uint64_t *chain = new uint64_t[HistogramS[temp]];
+            for (int i = 0; i < HistogramS[temp]; i++)
             {
                 uint64_t bucket = HashFunction2(bucketS[i].payload); // bucket for that payload
                 uint64_t last = bucketArray[bucket];
@@ -342,7 +342,7 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
                 chain[i] = last;
             }
             //go to other bucket
-            for (int i = 0; i < histR[temp]; i++)
+            for (int i = 0; i < HistogramR[temp]; i++)
             {
                 uint64_t bucket = HashFunction2(bucketR[i].payload); // bucket for that payload
                 if ((last = bucketArray[bucket]) != 0)
@@ -390,8 +390,8 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
             }
             delete chain;
         }
-        offsetR = offsetR + histR[temp];
-        offsetS = offsetS + histS[temp];
+        offsetR = offsetR + HistogramR[temp];
+        offsetS = offsetS + HistogramS[temp];
         delete bucketArray;
         delete bucketS;
         delete bucketR;
@@ -402,13 +402,13 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
     // ----------------
 
     // Delete of histograms and psums
-    delete histR;
-    delete histS;
-    delete psumR;
-    delete psumS;
-    // Delete of final arrays
-    delete Rt;
-    delete St;
+    // delete HistogramR;
+    // delete HistogramS;
+    // delete psumR;
+    // delete psumS;
+    // // Delete of final arrays
+    // delete Rt;
+    // delete St;
 
     // Delete of previous rowId vectors
     delete results1.rels;

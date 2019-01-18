@@ -39,6 +39,8 @@ typedef struct relation {
     uint64_t num_tuples;
 } relation;
 
+int HashFunction1( uint64_t payload, int n );
+
 class Join{
     
     public:
