@@ -35,5 +35,11 @@ optimize.o: optimize.cpp ./headers/optimize.hpp
 join.o: join.cpp ./headers/join.hpp
 	@g++ -c join.cpp $(PARAMS)
 
+scheduler.o: scheduler.cpp ./headers/scheduler.hpp
+	@g++ -c scheduler.cpp -pthread $(PARAMS)
+
+sche: 
+	g++ -o thread scheduler.cpp -std=c++11 -pthread
+
 clean:
 	@rm -f *.o ./main

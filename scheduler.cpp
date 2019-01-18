@@ -7,16 +7,14 @@ int current = 0;
 using namespace std;
 
 // Global variables
-JobScheduler scheduler;
+// JobScheduler scheduler;
 
 void *threadFunction(void* arg) {
     // Function that every thread runs as soon
     // as it is created
-    cout << "GOT IN" << endl;
     while ( work ) {
 
         Job* job = scheduler.getJob();
-        cout << pthread_self() << endl;
         job->execute();
 
     }
@@ -35,7 +33,7 @@ int JobScheduler::init() {
 
 int JobScheduler::destroy() {
     // Terminate all already executed threads
-    work = 0;
+    // work = 0;
     // Wait for them to exit
     for ( int i=0;i<THREAD_NUMBER;i++) {
         pthread_join(this->threads[i],NULL);
@@ -44,10 +42,11 @@ int JobScheduler::destroy() {
 }
 
 void JobScheduler::barrier() {
-    
-    for(int i = 0; i < THREAD_NUMBER; i++) {
-        pthread_join(this->threads[i],0);
-    }
+    // NOT FUNCTIONAL YET
+    sleep(3);
+    // while ( this->queue.size() <= 0 ) {
+    //     pthread_cond_wait(&this->nonempty, &this->mutex);
+    // }
 
 }
 
@@ -56,6 +55,7 @@ void JobScheduler::schedule(Job* job) {
     pthread_mutex_lock(&this->mutex);
     // Insert Job
     this->queue.push_back(job);
+    pthread_cond_signal(&this->nonempty);
     // Unlock mutex so that the process can continue
     pthread_mutex_unlock(&this->mutex);
 }
@@ -84,18 +84,19 @@ Job * JobScheduler::getJob() {
 }
 
 
-int main ( void ) { 
+
+// int main ( void ) { 
     // Main function used to test our Job Scheduler.
-    cout << "Creating jobs" << endl;
-    scheduler.schedule(new HistJob() );
-    scheduler.schedule(new HistJob());
-    scheduler.schedule(new HistJob());
-    scheduler.schedule(new HistJob());
-    scheduler.schedule(new HistJob());
-    scheduler.schedule(new HistJob());
-    cout << "Done jobs" << endl;
-    scheduler.init();
+    // scheduler.schedule(new HistJob(3) );
+    // scheduler.schedule(new HistJob(12));
+    // scheduler.schedule(new HistJob());
+    // scheduler.schedule(new HistJob());
+    // scheduler.schedule(new HistJob());
+    // scheduler.schedule(new HistJob());/
+    // scheduler.init();
     
-    scheduler.barrier();
-    return 0;
-}
+    
+    // scheduler.barrier();
+    // scheduler.destroy();
+    // return 0;
+// }
