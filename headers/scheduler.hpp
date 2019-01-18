@@ -40,17 +40,39 @@ class HistJob : public Job {
     void execute() {
         for (int i = from; i < to; i++) {
             uint64_t payload = data[i].payload;
-            uint64_t bucket = HashFunction1(payload, n);
+            uint64_t bucket = HashFunction1(payload, this->n);
             // increase appropriate hist counter
             hist[bucket]++;
         }
     }
 };
 
-class MergeJob : public Job {
+class PartJob : public Job {
+
     public:
+    // Starting relation.
+    package * data;
+    // Transformed relation.
+    package * datat;
+    // Psum array
+    unsigned int* psum;
+    // Range for which the thread is responsible.
+    int from;
+    int to;
+    // Value for the hash function
+    int n;
+
+
+
+    // Job constructor.
+    PartJob( package *data, package *datat, unsigned int* psum, int from, int to, int n) : data(data), datat(datat), psum(psum), from(from), to(to), n(n) {}
+
     void execute() {
-        cout << "MERGE JOB" << endl;
+        for ( int i = from; i < to; i++ )
+        {
+            int bucket = HashFunction1( data[i].payload, this->n );
+            datat[psum[bucket]++] = data[i];
+        }
     }
 };
 

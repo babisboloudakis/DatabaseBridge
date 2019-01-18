@@ -11,12 +11,13 @@ int HashFunction2( uint64_t payload ) {
     return payload % PRIME; 
 }
 
-// Global variables
-JobScheduler scheduler;
 
 // Thread version
 MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, FileArray &fileArray)
 {
+
+    JobScheduler scheduler;
+    scheduler.init();
 
     int index1, index2;
     for (int i = 0; i < results1.rels->size(); i++)
@@ -161,21 +162,6 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
         }
     }
     
-    // Fill up histogram with correct data
-    // for (int i = 0; i < Rn; i++)
-    // {
-    //     uint64_t payload = R[i].payload;
-    //     uint64_t bucket = HashFunction1(payload, n);
-    //     // increase appropriate hist counter
-    //     histR[bucket]++;
-    // }
-    // for (int i = 0; i < Sn; i++)
-    // {
-    //     uint64_t payload = S[i].payload;
-    //     uint64_t bucket = HashFunction1(payload, n);
-    //     // increase appropriate hist counter
-    //     histS[bucket]++;
-    // }
 
     // Create Psum Array
     unsigned int *psumR = new unsigned int[buckets];
@@ -189,27 +175,67 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
             psumS[0] = 0;
             continue;
         }
-        psumR[i] = psumR[i - 1] + histR[i - 1];
-        psumS[i] = psumS[i - 1] + histS[i - 1];
+        psumR[i] = psumR[i - 1] + HistogramR[i - 1];
+        psumS[i] = psumS[i - 1] + HistogramS[i - 1];
     }
 
-    // Using Psum Array, create the transformed relationships
-    for (int i = 0; i < Rn; i++)
-    {
-        uint64_t payload = R[i].payload;             // payload to write
-        uint64_t bucket = HashFunction1(payload, n); // bucket for that payload
-        Rt[psumR[bucket]].key = R[i].key;
-        Rt[psumR[bucket]].index = R[i].index; // INDEX
-        Rt[psumR[bucket]++].payload = R[i].payload;
+    // Create thread atomic Psums
+    unsigned int **psR = new unsigned int*[THREAD_NUMBER];
+    unsigned int **psS = new unsigned int *[THREAD_NUMBER];
+    for ( int i = 0; i < THREAD_NUMBER; i++ ) {
+        psR[i] = new unsigned int[buckets];
+        psS[i] = new unsigned int[buckets];
     }
-    for (int i = 0; i < Sn; i++)
-    {
-        uint64_t payload = S[i].payload;             // payload to write
-        uint64_t bucket = HashFunction1(payload, n); // bucket for that payload
-        St[psumS[bucket]].key = S[i].key;
-        St[psumS[bucket]].index = S[i].index; // INDEX
-        St[psumS[bucket]++].payload = S[i].payload;
+    for ( int i = 0; i < THREAD_NUMBER; i++ ) {
+        for ( int j = 0; j < buckets; j++ ) {
+            if ( i == 0 ) {
+                psR[0][j] = psumR[j];
+                psS[0][j] = psumS[j];
+            } else {
+                int tempr = 0;
+                int temps = 0;
+                for ( int k = 0; k < i; k++ ) {
+                    tempr += histR[k][j];
+                    temps += histS[k][j];
+                }
+                psR[i][j] = psumR[j]+tempr;
+                psS[i][j] = psumS[j]+temps;
+            }
+        }
     }
+    // Create thread Partion Jobs.
+    current = 0;
+    step = Rn / THREAD_NUMBER;
+    for (int i = 0; i < THREAD_NUMBER; i++)
+    {
+        if (i == THREAD_NUMBER - 1)
+        {
+            scheduler.schedule(new PartJob(R, Rt, psR[i], current, Rn, n ));
+        }
+        else
+        {
+            scheduler.schedule(new PartJob(R, Rt, psR[i], current, current + step, n));
+            current += step;
+        }
+    }
+    // Same for second relation
+    current = 0;
+    step = Sn / THREAD_NUMBER;
+    for (int i = 0; i < THREAD_NUMBER; i++)
+    {
+        if (i == THREAD_NUMBER - 1)
+        {
+            scheduler.schedule(new PartJob(S, St, psS[i], current, Rn, n));
+        }
+        else
+        {
+            scheduler.schedule(new PartJob(S, St, psS[i], current, current + step, n));
+            current += step;
+        }
+    }
+
+    // Wait for partitioning to finish before moving on.
+    scheduler.barrier();
 
     // ----------------
     // |  SECOND PART  |
