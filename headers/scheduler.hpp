@@ -3,6 +3,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <iostream>
+#include "headers/join.hpp"
 
 using namespace std;
 
@@ -20,9 +21,29 @@ class Job {
 class HistJob : public Job {
 
     public:
+    // Starting column
+    package * data;
+    // Start index
+    int from;
+    // End index
+    int to;
+    // n for hash function.
+    int n;
+    // Histogram 
+    unsigned int * hist;
+
+
+    // Job constructor.
+    HistJob(package* data, int from, int to, int n, unsigned int * hist) : data(data), from(from), to(to), n(n), hist(hist) {}
+
     // thread histogram task 
     void execute() {
-        cout << "Hist job!" << endl;
+        for (int i = from; i < to; i++) {
+            uint64_t payload = data[i].payload;
+            uint64_t bucket = HashFunction1(payload, n);
+            // increase appropriate hist counter
+            hist[bucket]++;
+        }
     }
 };
 

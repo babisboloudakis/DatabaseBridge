@@ -7,7 +7,7 @@ int current = 0;
 using namespace std;
 
 // Global variables
-JobScheduler scheduler;
+// JobScheduler scheduler;
 
 void *threadFunction(void* arg) {
     // Function that every thread runs as soon
@@ -33,7 +33,7 @@ int JobScheduler::init() {
 
 int JobScheduler::destroy() {
     // Terminate all already executed threads
-    work = 0;
+    // work = 0;
     // Wait for them to exit
     for ( int i=0;i<THREAD_NUMBER;i++) {
         pthread_join(this->threads[i],NULL);
@@ -43,9 +43,10 @@ int JobScheduler::destroy() {
 
 void JobScheduler::barrier() {
     // NOT FUNCTIONAL YET
-    while ( this->queue.size() <= 0 ) {
-        pthread_cond_wait(&this->nonempty, &this->mutex);
-    }
+    sleep(3);
+    // while ( this->queue.size() <= 0 ) {
+    //     pthread_cond_wait(&this->nonempty, &this->mutex);
+    // }
 
 }
 
@@ -84,17 +85,18 @@ Job * JobScheduler::getJob() {
 
 
 
-int main ( void ) { 
+// int main ( void ) { 
     // Main function used to test our Job Scheduler.
-    scheduler.schedule(new MergeJob() );
-    scheduler.schedule(new MergeJob());
+    // scheduler.schedule(new HistJob(3) );
+    // scheduler.schedule(new HistJob(12));
     // scheduler.schedule(new HistJob());
     // scheduler.schedule(new HistJob());
     // scheduler.schedule(new HistJob());
     // scheduler.schedule(new HistJob());/
-    scheduler.init();
+    // scheduler.init();
+    
     
     // scheduler.barrier();
     // scheduler.destroy();
-    return 0;
-}
+    // return 0;
+// }
