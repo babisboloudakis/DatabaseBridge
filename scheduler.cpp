@@ -12,11 +12,9 @@ JobScheduler scheduler;
 void *threadFunction(void* arg) {
     // Function that every thread runs as soon
     // as it is created
-    cout << "GOT IN" << endl;
     while ( work ) {
 
         Job* job = scheduler.getJob();
-        cout << pthread_self() << endl;
         job->execute();
 
     }
@@ -44,9 +42,9 @@ int JobScheduler::destroy() {
 }
 
 void JobScheduler::barrier() {
-    
-    for(int i = 0; i < THREAD_NUMBER; i++) {
-        pthread_join(this->threads[i],0);
+    // NOT FUNCTIONAL YET
+    while ( this->queue.size() <= 0 ) {
+        pthread_cond_wait(&this->nonempty, &this->mutex);
     }
 
 }
@@ -56,6 +54,7 @@ void JobScheduler::schedule(Job* job) {
     pthread_mutex_lock(&this->mutex);
     // Insert Job
     this->queue.push_back(job);
+    pthread_cond_signal(&this->nonempty);
     // Unlock mutex so that the process can continue
     pthread_mutex_unlock(&this->mutex);
 }
@@ -84,18 +83,18 @@ Job * JobScheduler::getJob() {
 }
 
 
+
 int main ( void ) { 
     // Main function used to test our Job Scheduler.
-    cout << "Creating jobs" << endl;
-    scheduler.schedule(new HistJob() );
-    scheduler.schedule(new HistJob());
-    scheduler.schedule(new HistJob());
-    scheduler.schedule(new HistJob());
-    scheduler.schedule(new HistJob());
-    scheduler.schedule(new HistJob());
-    cout << "Done jobs" << endl;
+    scheduler.schedule(new MergeJob() );
+    scheduler.schedule(new MergeJob());
+    // scheduler.schedule(new HistJob());
+    // scheduler.schedule(new HistJob());
+    // scheduler.schedule(new HistJob());
+    // scheduler.schedule(new HistJob());/
     scheduler.init();
     
-    scheduler.barrier();
+    // scheduler.barrier();
+    // scheduler.destroy();
     return 0;
 }

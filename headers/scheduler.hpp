@@ -26,6 +26,13 @@ class HistJob : public Job {
     }
 };
 
+class MergeJob : public Job {
+    public:
+    void execute() {
+        cout << "MERGE JOB" << endl;
+    }
+};
+
 // Definition of thread function
 void* threadFunction();
 
