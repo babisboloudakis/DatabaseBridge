@@ -23,6 +23,7 @@ typedef struct Stats {
 
 typedef struct RelInfo {
     int rel;
+    int index;
     vector<Stats> relStats;
 } RelInfo;
 
@@ -58,15 +59,17 @@ class Optimize{
 
     uint64_t cost(JoinInfo & join, vector<RelInfo> & rels1, vector<RelInfo> & rels2);
 
-    //uint64_t cost(SelfInfo filter);
+    uint64_t cost(SelfInfo & join, vector<RelInfo> & rels);
+
+    uint64_t cost(SelfInfo & join, RelInfo & relIn);
     
     void getRelStats(FileArray & fileArray, Parser & parser);
 
     void updateStats(vector<FilterInfo> & filters);
 
-    void optimizeJoins(vector<JoinInfo> & joins);
+    void updateStats(vector<SelfInfo> & joins);
 
-    // void Optimize::updateStats(vector<SelfInfo> & joins);
+    void optimizeJoins(vector<JoinInfo> & joins);
 
     void optimizeQuery(FileArray & fileArray, Parser & parser);
 };
