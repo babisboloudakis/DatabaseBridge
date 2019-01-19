@@ -40,6 +40,7 @@ typedef struct relation {
 } relation;
 
 int HashFunction1( uint64_t payload, int n );
+int HashFunction2(uint64_t payload);
 
 class Join{
     
