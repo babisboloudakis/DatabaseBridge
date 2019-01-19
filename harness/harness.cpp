@@ -10,6 +10,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <chrono>
 //---------------------------------------------------------------------------
 using namespace std;
 //---------------------------------------------------------------------------
@@ -174,7 +175,7 @@ int main(int argc, char *argv[]) {
 
 #if 1
   // Wait for 1 second
-  this_thread::sleep_for(1s);
+  this_thread::sleep_for(std::chrono::seconds(1));
 
 #else
   // Wait for the ready signal
