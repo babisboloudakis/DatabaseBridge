@@ -1,4 +1,6 @@
 #include "headers/scheduler.hpp"
+#include <unistd.h>
+
 // used to signal thread termination
 int work = 1;
 // used to break thread jobs
@@ -43,7 +45,7 @@ int JobScheduler::destroy() {
 
 void JobScheduler::barrier() {
     // NOT FUNCTIONAL YET
-    sleep(3);
+    usleep(300000);
     // while ( this->queue.size() <= 0 ) {
     //     pthread_cond_wait(&this->nonempty, &this->mutex);
     // }

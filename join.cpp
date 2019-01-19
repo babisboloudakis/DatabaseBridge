@@ -11,12 +11,11 @@ int HashFunction2( uint64_t payload ) {
     return payload % PRIME; 
 }
 
+JobScheduler scheduler;
 
 // Thread version
 MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, FileArray &fileArray)
 {
-
-    JobScheduler scheduler;
     scheduler.init();
 
     int index1, index2;
@@ -225,7 +224,7 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
     {
         if (i == THREAD_NUMBER - 1)
         {
-            scheduler.schedule(new PartJob(S, St, psS[i], current, Rn, n));
+            scheduler.schedule(new PartJob(S, St, psS[i], current, Sn, n));
         }
         else
         {
@@ -402,13 +401,27 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
     // ----------------
 
     // Delete of histograms and psums
-    // delete HistogramR;
-    // delete HistogramS;
-    // delete psumR;
-    // delete psumS;
-    // // Delete of final arrays
-    // delete Rt;
-    // delete St;
+    delete HistogramR;
+    delete HistogramS;
+    for ( int i = 0; i < THREAD_NUMBER; i++ ) {
+        delete histR[i];
+        delete histS[i];
+    }
+    delete histR;
+    delete histS;
+
+    delete psumR;
+    delete psumS;
+    for (int i = 0; i < THREAD_NUMBER; i++)
+    {
+        delete psR[i];
+        delete psS[i];
+    }
+    delete psR;
+    delete psS;
+    // Delete of final arrays
+    delete Rt;
+    delete St;
 
     // Delete of previous rowId vectors
     delete results1.rels;

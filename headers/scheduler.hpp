@@ -7,7 +7,7 @@
 
 using namespace std;
 
-#define THREAD_NUMBER 3 
+#define THREAD_NUMBER 3
 
 // Abstract class, should be inherited to create a variety of jobs
 class Job {
@@ -119,3 +119,5 @@ class JobScheduler {
     Job * getJob();
 
 };
+
+extern JobScheduler scheduler;
