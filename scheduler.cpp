@@ -3,13 +3,9 @@
 
 // used to signal thread termination
 int work = 1;
-// used to break thread jobs
-int current = 0;
 
 using namespace std;
 
-// Global variables
-// JobScheduler scheduler;
 
 void *threadFunction(void* arg) {
     // Function that every thread runs as soon
@@ -53,13 +49,14 @@ int JobScheduler::destroy() {
 }
 
 void JobScheduler::barrierInit(int n) {
+    // Initialize the number of jobs to be executed with n.
     pthread_mutex_lock(&this->mutex);
     this->jobCounter = n;
     pthread_mutex_unlock(&this->mutex);
 }
 
 void JobScheduler::barrier() {
-    // NOT FUNCTIONAL YET
+    // Suspend execution until all threads complete their tasks.
     pthread_mutex_lock(&this->mutex);
     while ( this->jobCounter > 0 ) {
         pthread_cond_wait(&this->empty, &this->mutex);
@@ -100,21 +97,3 @@ Job * JobScheduler::getJob() {
     pthread_mutex_unlock(&this->mutex);
     return job;
 }
-
-
-
-// int main ( void ) { 
-    // Main function used to test our Job Scheduler.
-    // scheduler.schedule(new HistJob(3) );
-    // scheduler.schedule(new HistJob(12));
-    // scheduler.schedule(new HistJob());
-    // scheduler.schedule(new HistJob());
-    // scheduler.schedule(new HistJob());
-    // scheduler.schedule(new HistJob());/
-    // scheduler.init();
-    
-    
-    // scheduler.barrier();
-    // scheduler.destroy();
-    // return 0;
-// }

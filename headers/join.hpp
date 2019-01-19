@@ -13,8 +13,8 @@
 #include "read.hpp"
 #endif
 
-#define BUFFERSIZE 1048576 // 1024 * 1024 = 1 MB
-#define PRIME 7 // prime number used in HashFunction2 
+#define BUFFERSIZE 2048 // 1024 * 1024 = 1 MB
+#define PRIME 17 // prime number used in HashFunction2 
 
 /** Type definition for a tuple */
 typedef struct package {

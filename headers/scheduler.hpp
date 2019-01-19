@@ -7,7 +7,7 @@
 
 using namespace std;
 
-#define THREAD_NUMBER 3
+#define THREAD_NUMBER 2
 
 // Abstract class, should be inherited to create a variety of jobs
 class Job {
@@ -74,6 +74,23 @@ class PartJob : public Job {
             datat[psum[bucket]++] = data[i];
         }
     }
+};
+
+
+class JoinJob : public Job {
+    // Thread job to execute join between two buckets inside
+    // radix hash join function.
+    
+    public:
+
+
+    // Job Constructor.
+    JoinJob(){}
+    // Job join method.
+    void execute() {
+
+    }
+
 };
 
 // Definition of thread function
