@@ -7,7 +7,7 @@
 
 using namespace std;
 
-#define THREAD_NUMBER 2
+#define THREAD_NUMBER 4
 
 // Abstract class, should be inherited to create a variety of jobs
 class Job {

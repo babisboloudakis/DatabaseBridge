@@ -1,6 +1,8 @@
 #include <iostream>
 #include "headers/query.hpp"
 
+extern JobScheduler scheduler;
+
 using namespace std;
 
 int main(int argc, char* argv[]) {
@@ -41,6 +43,9 @@ int main(int argc, char* argv[]) {
         // }
         // cout << endl;
     }
+
+    // Create Threds.
+    scheduler.init();
     
     while (getline(cin, line)) {
         if (line == "F") continue; // End of a batch
@@ -50,6 +55,9 @@ int main(int argc, char* argv[]) {
         query.computeQuery(fileArray, line);
     }
 
+    // Destroy threads and Job Scheduler Data structures.
+    scheduler.destroy();
+    
     return 0;
     
 }

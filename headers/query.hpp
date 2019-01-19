@@ -1,6 +1,6 @@
 #include "optimize.hpp"
 #include "filter.hpp"
-#include "join.hpp"
+#include "scheduler.hpp"
 
 using namespace std;
  
@@ -16,8 +16,6 @@ class Query {
     Filter filters;
     //joins
     Join joins;
-
-
 
     public:
     Query(){}; 

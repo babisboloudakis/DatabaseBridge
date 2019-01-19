@@ -16,12 +16,10 @@ void *threadFunction(void* arg) {
         job->execute();
         delete job; 
         pthread_mutex_lock(&scheduler.mutex);
-
         scheduler.jobCounter--;
         if ( scheduler.jobCounter == 0 ) {
             pthread_cond_signal(&scheduler.empty);
         }
-
         pthread_mutex_unlock(&scheduler.mutex);
 
     }
@@ -41,6 +39,7 @@ int JobScheduler::init() {
 int JobScheduler::destroy() {
     // Terminate all already executed threads
     work = 0;
+    pthread_cond_broadcast(&this->nonempty);
     // Wait for them to exit
     for ( int i=0;i<THREAD_NUMBER;i++) {
         pthread_join(this->threads[i],NULL);

@@ -217,7 +217,6 @@ void Query::computeJoins(FileArray &fileArray){
 
 }
 
-
 void Query::computeQuery(FileArray & fileArray, string & line) {
     //parse Query info
     this->parser.parseQuery(line);
