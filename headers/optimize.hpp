@@ -15,9 +15,20 @@ typedef struct Stats {
     uint64_t distinct;
     
     // Struct constructor
-    Stats (int rel, int col, uint64_t min, 
-    uint64_t max, uint64_t size, uint64_t distinct) : 
+    Stats (int rel=0, int col=0, uint64_t min=0, 
+    uint64_t max=0, uint64_t size=0, uint64_t distinct=0) : 
     rel(rel), col(col), min(min), max(max), size(size), distinct(distinct) {};
+
+    inline Stats operator=(Stats a) {
+        rel=a.rel;
+        col=a.col;
+        min=a.min;
+        max = a.max;
+        size = a.size;
+        distinct = a.distinct;
+        return a;
+    }
+
 
 } Stats;
 
@@ -59,9 +70,15 @@ class Optimize{
 
     uint64_t cost(JoinInfo & join, vector<RelInfo> & rels1, vector<RelInfo> & rels2);
 
+    uint64_t cost(JoinInfo & join, RelInfo & rels1, RelInfo & rels2);
+    
     uint64_t cost(SelfInfo & join, vector<RelInfo> & rels);
 
     uint64_t cost(SelfInfo & join, RelInfo & relIn);
+
+    uint64_t cost_a(JoinInfo & join, vector<RelInfo> & rels1, vector<RelInfo> & rels2);
+    
+    uint64_t cost_a(JoinInfo & join, RelInfo & rels1, RelInfo & rels2);
     
     void getRelStats(FileArray & fileArray, Parser & parser);
 
