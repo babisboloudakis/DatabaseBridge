@@ -9,135 +9,144 @@ uint64_t Optimize::cost(FilterInfo & filter, RelInfo & relIn){
     uint64_t colSize;
     int relPos;
     int colPos;
-
+    cout << "HOLA SENIORITA " << relIn.relStats.at(0).size <<endl; 
     switch( filter.op ) {
-            case FilterInfo::FilterOperation::LESS:
-                for (int j=0; j < relIn.relStats.size(); j++){ //find col
-                    if ( j == filter.col){ //cols are ordered
-                        colPos = j;
-                        //check if null
-                        if (relIn.relStats.at(j).size == 0){
-                            return 0;
-                        }
-                        //boundaries check
-                        if (relIn.relStats.at(j).max < val){  // all
-                            val = relIn.relStats.at(j).max;
-                        }
-                        else if (relIn.relStats.at(j).min > val){ //size = 0 
-                            for (int n=0; n < relIn.relStats.size(); n++){
-                                relIn.relStats.at(n).min = 0;
-                                relIn.relStats.at(n).size = 0;
-                                relIn.relStats.at(n).distinct = 0;
-                                relIn.relStats.at(n).max = 0;
-                            }
-                            return 0;
-                        }
-                        colSize = relIn.relStats.at(j).size;
-                        relIn.relStats.at(j).size = ((val - relIn.relStats.at(j).min) / (relIn.relStats.at(j).max - relIn.relStats.at(j).min) * relIn.relStats.at(j).size);
-                        relIn.relStats.at(j).distinct = ((val - relIn.relStats.at(j).min) / (relIn.relStats.at(j).max - relIn.relStats.at(j).min) * relIn.relStats.at(j).distinct);
-                        relIn.relStats.at(j).max = val;
-                        break;
+        case FilterInfo::FilterOperation::LESS:
+            for (int j=0; j < relIn.relStats.size(); j++){ //find col
+                if ( j == filter.col){ //cols are ordered
+                    colPos = j;
+                    //check if null
+                    if (relIn.relStats.at(j).size == 0){
+                        cout << "NULL" << endl;
+                        return 0;
                     }
-                    else{
-                        continue;
-                    }  
+                    //boundaries check
+                    if (relIn.relStats.at(j).max < val){  // all
+                        val = relIn.relStats.at(j).max;
+                    }
+                    else if (relIn.relStats.at(j).min > val){ //size = 0 
+                        cout << "TH GAMISAME" << endl;
+                        for (int n=0; n < relIn.relStats.size(); n++){
+                            relIn.relStats.at(n).min = 0;
+                            relIn.relStats.at(n).size = 0;
+                            relIn.relStats.at(n).distinct = 0;
+                            relIn.relStats.at(n).max = 0;
+                        }
+                        return 0;
+                    }
+                    colSize = relIn.relStats.at(j).size;
+                    relIn.relStats.at(j).size = ((val - relIn.relStats.at(j).min) / (relIn.relStats.at(j).max - relIn.relStats.at(j).min) * relIn.relStats.at(j).size);
+                    relIn.relStats.at(j).distinct = ((val - relIn.relStats.at(j).min) / (relIn.relStats.at(j).max - relIn.relStats.at(j).min) * relIn.relStats.at(j).distinct);
+                    relIn.relStats.at(j).max = val;
+                    break;
                 }
-                //update other col stats
-                for (int j=0; j < relIn.relStats.size(); j++){
-                    if ( j == filter.col){ //already updated
-                        continue; 
-                    }
-                    else{   //for other cols
-                        relIn.relStats.at(j).distinct = relIn.relStats.at(j).distinct * (1 - (uint64_t)pow(1 - (relIn.relStats.at(colPos).size / colSize), relIn.relStats.at(j).size / relIn.relStats.at(j).distinct));
-                        relIn.relStats.at(j).size = relIn.relStats.at(colPos).size;
-                    }
+                else{
+                    continue;
+                }  
+            }
+            //update other col stats
+            for (int j=0; j < relIn.relStats.size(); j++){
+                if ( j == filter.col){ //already updated
+                    continue; 
                 }
-                break;        
-                
-                
-            case FilterInfo::FilterOperation::GREATER:
-                for (int j=0; j < relIn.relStats.size(); j++){ //find col
-                    if ( j == filter.col){ //cols are ordered
-                        colPos = j;
-                        //check if null
-                        if (relIn.relStats.at(j).size == 0){
-                            return 0;
-                        }
-                        //boundaries check
-                        if (relIn.relStats.at(j).min > val){  // all
-                            val = relIn.relStats.at(j).min;
-                        }
-                        else if (relIn.relStats.at(j).max < val){ //size = 0 
-                            for (int n=0; n < relIn.relStats.size(); n++){
-                                relIn.relStats.at(n).min = 0;
-                                relIn.relStats.at(n).size = 0;
-                                relIn.relStats.at(n).distinct = 0;
-                                relIn.relStats.at(n).max = 0;
-                            }
-                            return 0;
-                        }
-                        colSize = relIn.relStats.at(j).size;
-                        relIn.relStats.at(j).size = ((relIn.relStats.at(j).max - val) / (relIn.relStats.at(j).max - relIn.relStats.at(j).min) * relIn.relStats.at(j).size);
-                        relIn.relStats.at(j).distinct = ((relIn.relStats.at(j).max - val) / (relIn.relStats.at(j).max - relIn.relStats.at(j).min) * relIn.relStats.at(j).distinct);
-                        relIn.relStats.at(j).min = val;
-                        break;
-                    }
-                    else{
-                        continue;
-                    }  
+                else{   //for other cols
+                    relIn.relStats.at(j).distinct = relIn.relStats.at(j).distinct * (1 - (uint64_t)pow(1 - (relIn.relStats.at(colPos).size / colSize), relIn.relStats.at(j).size / relIn.relStats.at(j).distinct));
+                    relIn.relStats.at(j).size = relIn.relStats.at(colPos).size;
                 }
-                //update other col stats
-                for (int j=0; j < relIn.relStats.size(); j++){
-                    if ( j == filter.col){ //already updated
-                        continue; 
+            }
+            break;        
+            
+            
+        case FilterInfo::FilterOperation::GREATER:
+            for (int j=0; j < relIn.relStats.size(); j++){ //find col
+                if ( j == filter.col){ //cols are ordered
+                    colPos = j;
+                    //check if null
+                    if (relIn.relStats.at(j).size == 0){
+                        cout << "NULL" << endl;
+                        return 0;
                     }
-                    else{   //for other cols
-                        relIn.relStats.at(j).distinct = relIn.relStats.at(j).distinct * (1 - (uint64_t)pow(1 - (relIn.relStats.at(colPos).size / colSize), relIn.relStats.at(j).size / relIn.relStats.at(j).distinct));
-                        relIn.relStats.at(j).size = relIn.relStats.at(colPos).size;
+                    //boundaries check
+                    if (relIn.relStats.at(j).min > val){  // all
+                        val = relIn.relStats.at(j).min;
                     }
-                }
-                break;
-            case FilterInfo::FilterOperation::EQUAL:
-                for (int j=0; j < relIn.relStats.size(); j++){ //find col
-                    if ( j == filter.col){ //cols are ordered
-                        colPos = j;
-                        //check if null
-                        if (relIn.relStats.at(j).size == 0){
-                            return 0;
+                    else if (relIn.relStats.at(j).max < val){ //size = 0 
+                        cout << "TH GAMISAME" << endl;
+                        for (int n=0; n < relIn.relStats.size(); n++){
+                            relIn.relStats.at(n).min = 0;
+                            relIn.relStats.at(n).size = 0;
+                            relIn.relStats.at(n).distinct = 0;
+                            relIn.relStats.at(n).max = 0;
                         }
-                        //boundaries check
-                        if (relIn.relStats.at(j).min > val || relIn.relStats.at(j).max < val){ //size = 0 
-                            for (int n=0; n < relIn.relStats.size(); n++){
-                                relIn.relStats.at(n).min = 0;
-                                relIn.relStats.at(n).size = 0;
-                                relIn.relStats.at(n).distinct = 0;
-                                relIn.relStats.at(n).max = 0;
-                            }
-                            return 0;
+                        return 0;
+                    }
+                    colSize = relIn.relStats.at(j).size;
+                    relIn.relStats.at(j).size = (((relIn.relStats.at(j).max - val) / (relIn.relStats.at(j).max - relIn.relStats.at(j).min)) * relIn.relStats.at(j).size);
+                    
+                    relIn.relStats.at(j).distinct = ((relIn.relStats.at(j).max - val) / (relIn.relStats.at(j).max - relIn.relStats.at(j).min) * relIn.relStats.at(j).distinct);
+                    // relIn.relStats.at(j).min = val;
+                    cout << relIn.rel << j <<  " RE12 " << relIn.relStats.at(j).size << " colSize " << (relIn.relStats.at(j).max - val) / (relIn.relStats.at(j).max - relIn.relStats.at(j).min)<< endl;
+                    break;
+                }
+                else{
+                    continue;
+                }  
+            }
+            //update other col stats
+            for (int j=0; j < relIn.relStats.size(); j++){
+                if ( j == filter.col){ //already updated
+                    continue; 
+                }
+                else{   //for other cols
+                    relIn.relStats.at(j).distinct = relIn.relStats.at(j).distinct * (1 - (uint64_t)pow(1 - (relIn.relStats.at(colPos).size / colSize), relIn.relStats.at(j).size / relIn.relStats.at(j).distinct));
+                    relIn.relStats.at(j).size = relIn.relStats.at(colPos).size;
+                }
+            }
+            cout << "RE " << relIn.relStats.at(0).size<< endl;
+
+            break;
+        case FilterInfo::FilterOperation::EQUAL:
+            for (int j=0; j < relIn.relStats.size(); j++){ //find col
+                if ( j == filter.col){ //cols are ordered
+                    colPos = j;
+                    //check if null
+                    if (relIn.relStats.at(j).size == 0){
+                        return 0;
+                    }
+                    //boundaries check
+                    if (relIn.relStats.at(j).min > val || relIn.relStats.at(j).max < val){ //size = 0 
+                        for (int n=0; n < relIn.relStats.size(); n++){
+                            relIn.relStats.at(n).min = 0;
+                            relIn.relStats.at(n).size = 0;
+                            relIn.relStats.at(n).distinct = 0;
+                            relIn.relStats.at(n).max = 0;
                         }
-                        colSize = relIn.relStats.at(j).size;
-                        relIn.relStats.at(j).size = relIn.relStats.at(j).size/relIn.relStats.at(j).distinct;
-                        relIn.relStats.at(j).distinct = 1;
-                        relIn.relStats.at(j).max = val;
-                        relIn.relStats.at(j).min = val;
-                        break;
+                        return 0;
                     }
-                    else{
-                        continue;
-                    }  
+                    colSize = relIn.relStats.at(j).size;
+                    relIn.relStats.at(j).size = relIn.relStats.at(j).size/relIn.relStats.at(j).distinct;
+                    relIn.relStats.at(j).distinct = 1;
+                    relIn.relStats.at(j).max = val;
+                    relIn.relStats.at(j).min = val;
+                    break;
                 }
-                //update other col stats
-                for (int j=0; j < relIn.relStats.size(); j++){
-                    if ( j == filter.col){ //already updated
-                        continue; 
-                    }
-                    else{   //for other cols
-                        relIn.relStats.at(j).distinct = relIn.relStats.at(j).distinct * (1 - (uint64_t)pow(1 - (relIn.relStats.at(colPos).size / colSize), relIn.relStats.at(j).size / relIn.relStats.at(j).distinct));
-                        relIn.relStats.at(j).size = relIn.relStats.at(colPos).size;
-                    }
+                else{
+                    continue;
+                }  
+            }
+            //update other col stats
+            for (int j=0; j < relIn.relStats.size(); j++){
+                if ( j == filter.col){ //already updated
+                    continue; 
                 }
-                break;
-        }   
+                else{   //for other cols
+                    relIn.relStats.at(j).distinct = relIn.relStats.at(j).distinct * (1 - (uint64_t)pow(1 - (relIn.relStats.at(colPos).size / colSize), relIn.relStats.at(j).size / relIn.relStats.at(j).distinct));
+                    relIn.relStats.at(j).size = relIn.relStats.at(colPos).size;
+                }
+            }
+            break;
+    }
+    return relIn.relStats.at(0).size;  
 }
 
 uint64_t Optimize::cost(FilterInfo & filter, vector<RelInfo> & rels){ 
@@ -341,16 +350,143 @@ uint64_t Optimize::cost(FilterInfo & filter, vector<RelInfo> & rels){
 }
 
 uint64_t Optimize::cost(JoinInfo & join, vector<RelInfo> & rels1, vector<RelInfo> & rels2){
+    Stats relStats1, relStats2;
+    int pos1, pos2; 
+    uint64_t n, d, s;
+    for (int i=0; i<rels1.size(); i++){
+        if (rels1.at(i).rel == join.rel1 && rels1.at(i).index == join.index1){
+            pos1 = i;
+            for (int j=0; j<rels1.at(i).relStats.size(); j++){
+                if (j == join.col1){
+                    relStats1 = rels1.at(i).relStats.at(j);
+                }
+                break;
+            }
+        }
+        break;
+    }
+    for (int i=0; i<rels2.size(); i++){
+        if (rels2.at(i).rel == join.rel1 && rels2.at(i).index == join.index1){
+            pos2 = i;
+            for (int j=0; j<rels2.at(i).relStats.size(); j++){
+                if (j == join.col2){
+                    relStats2 = rels1.at(i).relStats.at(j);
+                }
+                break;
+            }
+        }
+        break;
+    }
+
+    n = relStats1.max - relStats2.min +1;
+    d = (relStats1.distinct * relStats2.distinct) / n;
+    s = (relStats1.size * relStats2.size) / n;
+
+    for (int i=0; i<rels1.size(); i++){
+        if (pos1 == i){
+            for (int j=0; j<rels1.at(i).relStats.size(); j++){
+                if (j == join.col1){
+                   rels1.at(i).relStats.at(j).distinct = d;
+                   rels1.at(i).relStats.at(j).size = s;
+                }
+                else{
+                    rels1.at(i).relStats.at(j).distinct = rels1.at(i).relStats.at(j).distinct * (1 - (uint64_t)pow(1 - (d / relStats1.distinct), rels1.at(i).relStats.at(j).size / rels1.at(i).relStats.at(j).distinct));
+                    rels1.at(i).relStats.at(j).size = s;
+                }
+            }
+        }
+        else{
+            for (int j=0; j<rels1.at(i).relStats.size(); j++){
+                rels1.at(i).relStats.at(j).distinct = rels1.at(i).relStats.at(j).distinct * (1 - (uint64_t)pow(1 - (d / relStats1.distinct), rels1.at(i).relStats.at(j).size / rels1.at(i).relStats.at(j).distinct));
+                rels1.at(i).relStats.at(j).size = s;
+            }
+        }
+    }
+    for(int i=0; i<rels2.size(); i++){
+        if (pos2 == i){
+            for (int j=0; j<rels2.at(i).relStats.size(); j++){
+                if (j == join.col2){
+                   rels2.at(i).relStats.at(j).distinct = d;
+                   rels2.at(i).relStats.at(j).size = s;
+                }
+                else{
+                    rels2.at(i).relStats.at(j).distinct = rels2.at(i).relStats.at(j).distinct * (1 - (uint64_t)pow(1 - (d / relStats2.distinct), rels2.at(i).relStats.at(j).size / rels2.at(i).relStats.at(j).distinct));
+                    rels2.at(i).relStats.at(j).size = s;
+                }
+                
+            }
+        }
+        else{
+            for (int j=0; j<rels2.at(i).relStats.size(); j++){
+                rels2.at(i).relStats.at(j).distinct = rels2.at(i).relStats.at(j).distinct * (1 - (uint64_t)pow(1 - (d / relStats2.distinct), rels2.at(i).relStats.at(j).size / rels2.at(i).relStats.at(j).distinct));
+                rels2.at(i).relStats.at(j).size = s;
+            }
+        }
+    }   
+}
+
+uint64_t Optimize::cost(JoinInfo & join, RelInfo & rels1, RelInfo & rels2){
+    Stats relStats1, relStats2; 
+    uint64_t n, d, s;
+    if (rels1.rel == join.rel1 && rels1.index == join.index1){
+        for (int j=0; j<rels1.relStats.size(); j++){
+            if (j == join.col1){
+                relStats1 = rels1.relStats.at(j);
+            }
+            break;
+        }
+    }
     
+    if (rels2.rel == join.rel1 && rels2.index == join.index1){
+        for (int j=0; j<rels2.relStats.size(); j++){
+            if (j == join.col2){
+                relStats2 = rels1.relStats.at(j);
+            }
+            break;
+        }
+    }
+    
+    n = relStats1.max - relStats1.min +1;
+    
+    d = (relStats1.distinct * relStats2.distinct) / n;
+    s = (relStats1.size * relStats2.size) / n;
+
+    cout << "d " << relStats1.distinct << " mi " << relStats1.min << " ma " << relStats1.max << " si" << relStats1.size<< endl;
+    
+    for (int j=0; j<rels1.relStats.size(); j++){
+        if (j == join.col1){
+            rels1.relStats.at(j).distinct = d;
+            rels1.relStats.at(j).size = s;
+        }
+        else{
+            cout << relStats1.distinct << endl;
+            rels1.relStats.at(j).distinct = rels1.relStats.at(j).distinct * (1 - (uint64_t)pow(1 - (d / relStats1.distinct), rels1.relStats.at(j).size / rels1.relStats.at(j).distinct));
+            cout << "meow" << endl;
+            rels1.relStats.at(j).size = s;
+        }
+    }
+    cout << n <<endl;
+    for (int j=0; j<rels2.relStats.size(); j++){
+        if (j == join.col2){
+            rels2.relStats.at(j).distinct = d;
+            rels2.relStats.at(j).size = s;
+        }
+        else{
+            rels2.relStats.at(j).distinct = rels2.relStats.at(j).distinct * (1 - (uint64_t)pow(1 - (d / relStats2.distinct), rels2.relStats.at(j).size / rels2.relStats.at(j).distinct));
+            rels2.relStats.at(j).size = s;
+        } 
+    }
+    cout << n <<endl;
+        
 }
 
 uint64_t Optimize::cost(SelfInfo & join, vector<RelInfo> & rels){
     int pos;
-    int min;
-    int max;
-    int n;
-    int size;
-    int fa;
+    uint64_t min;
+    uint64_t max;
+    uint64_t n;
+    uint64_t size;
+    uint64_t fa;
     for(int i=0; i<rels.size(); i++){
         if (join.rel == rels.at(i).rel && join.index == rels.at(i).index){
             pos = i;
@@ -399,11 +535,11 @@ uint64_t Optimize::cost(SelfInfo & join, vector<RelInfo> & rels){
 }
 
 uint64_t Optimize::cost(SelfInfo & join, RelInfo & relIn){
-    int min;
-    int max;
-    int n;
-    int size;
-    int fa;
+    uint64_t min;
+    uint64_t max;
+    uint64_t n;
+    uint64_t size;
+    uint64_t fa;
     if (relIn.relStats.at(join.col1).min > relIn.relStats.at(join.col2).min ){
         min = relIn.relStats.at(join.col1).min;
     }
@@ -435,6 +571,14 @@ uint64_t Optimize::cost(SelfInfo & join, RelInfo & relIn){
         }
     }
     
+    
+}
+
+uint64_t Optimize::cost_a(JoinInfo & join, vector<RelInfo> & rels1, vector<RelInfo> & rels2){
+
+}
+
+uint64_t Optimize::cost_a(JoinInfo & join, RelInfo & rels1, RelInfo & rels2){
     
 }
 
@@ -504,12 +648,17 @@ void Optimize::optimizeJoins(vector<JoinInfo> & joins){
                 tempMap.joins.push_back(tempJoin.at(j));
                 for(int k=0; k < this->rels.size(); k++){       //campture rels to join
                     if (tempJoin.at(j).rel1 == this->rels.at(k).rel && this->rels.at(k).index == tempJoin.at(j).index1){
-                        tempRel1 = rels.at(k);
+                        tempRel1.rel = rels.at(k).rel;
+                        tempRel1.index = rels.at(k).index;
+                        tempRel1.relStats = rels.at(k).relStats;
+                        cout << "max " << rels.at(k).relStats.at(0).max << " tempMax " << tempRel1.relStats.at(0).max << endl;
                         col1 = tempJoin.at(j).col1;
                             
                     }
                     else if (tempJoin.at(j).rel2 == this->rels.at(k).rel && this->rels.at(k).index == tempJoin.at(j).index2){
-                        tempRel2 = rels.at(k);
+                        tempRel2.rel = rels.at(k).rel;
+                        tempRel2.index = rels.at(k).index;
+                        tempRel2.relStats = rels.at(k).relStats;
                         col2 = tempJoin.at(j).col2;
                         
                     }    
@@ -518,28 +667,38 @@ void Optimize::optimizeJoins(vector<JoinInfo> & joins){
                 if (tempRel1.relStats.at(col1).min < tempRel2.relStats.at(col2).min){
                     //call costFilter on rel1
                     FilterInfo tempFilter(tempRel1.rel, col1, tempRel2.relStats.at(col2).min, FilterInfo::FilterOperation::GREATER, tempRel1.index);
-                    this->cost(tempFilter, tempRel1);
+                    cout << this->cost(tempFilter, tempRel1) << " a " <<endl;
 
                 }
                 else if (tempRel1.relStats.at(col1).min > tempRel2.relStats.at(col2).min){
                     //call costFilter on rel2
                     FilterInfo tempFilter(tempRel2.rel, col2, tempRel1.relStats.at(col1).min, FilterInfo::FilterOperation::GREATER, tempRel1.index);
-                    this->cost(tempFilter, tempRel2);
+                    cout << this->cost(tempFilter, tempRel2)<< " b " <<endl;
                 }
 
                 if (tempRel1.relStats.at(col1).max > tempRel2.relStats.at(col2).max){
                     //call costFilter on rel1
                     FilterInfo tempFilter(tempRel1.rel, col1, tempRel2.relStats.at(col2).max, FilterInfo::FilterOperation::LESS, tempRel1.index);
-                    this->cost(tempFilter, tempRel1);
+                    cout << this->cost(tempFilter, tempRel1) << " c " <<endl;
                 }
                 else if (tempRel1.relStats.at(col1).max < tempRel2.relStats.at(col2).max){
                     //call costFilter on rel2
                     FilterInfo tempFilter(tempRel2.rel, col2, tempRel1.relStats.at(col1).max, FilterInfo::FilterOperation::LESS, tempRel1.index);
-                    this->cost(tempFilter, tempRel2);
+                    cout << this->cost(tempFilter, tempRel2)<< " d " <<endl;
                 }
                 
                 //update cost
-                //tempMap.cost = cost(join, rel1, rel2);
+                if(tempRel1.rel == tempRel2.rel && tempJoin.at(j).col1 == tempJoin.at(j).col2){
+                    //autojoin
+                    //tempMap.cost = cost(join, rel1, rel2);
+                }
+                else{
+                    //normal join
+                    cout << "i cry" <<endl;
+                    tempMap.cost = cost(tempJoin.at(j), tempRel1, tempRel2);
+                    cout << "evry time" <<endl;
+                }
+                
                 //push modified rels
                 tempMap.joinedRels.push_back(tempRel1);
                 tempMap.joinedRels.push_back(tempRel2);
