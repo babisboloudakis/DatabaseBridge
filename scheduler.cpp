@@ -18,6 +18,15 @@ void *threadFunction(void* arg) {
 
         Job* job = scheduler.getJob();
         job->execute();
+        delete job; 
+        pthread_mutex_lock(&scheduler.mutex);
+
+        scheduler.jobCounter--;
+        if ( scheduler.jobCounter == 0 ) {
+            pthread_cond_signal(&scheduler.empty);
+        }
+
+        pthread_mutex_unlock(&scheduler.mutex);
 
     }
     // Exit as soon as jobs done
@@ -35,7 +44,7 @@ int JobScheduler::init() {
 
 int JobScheduler::destroy() {
     // Terminate all already executed threads
-    // work = 0;
+    work = 0;
     // Wait for them to exit
     for ( int i=0;i<THREAD_NUMBER;i++) {
         pthread_join(this->threads[i],NULL);
@@ -43,12 +52,19 @@ int JobScheduler::destroy() {
     return 0;
 }
 
+void JobScheduler::barrierInit(int n) {
+    pthread_mutex_lock(&this->mutex);
+    this->jobCounter = n;
+    pthread_mutex_unlock(&this->mutex);
+}
+
 void JobScheduler::barrier() {
     // NOT FUNCTIONAL YET
-    usleep(300000);
-    // while ( this->queue.size() <= 0 ) {
-    //     pthread_cond_wait(&this->nonempty, &this->mutex);
-    // }
+    pthread_mutex_lock(&this->mutex);
+    while ( this->jobCounter > 0 ) {
+        pthread_cond_wait(&this->empty, &this->mutex);
+    }  
+    pthread_mutex_unlock(&this->mutex);
 
 }
 

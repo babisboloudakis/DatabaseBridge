@@ -119,8 +119,12 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
     }
 
     // Create thread Histogram Jobs.
+    int numberOfJobs = 0;
     int current = 0;
     int step = Rn / THREAD_NUMBER;
+
+    scheduler.barrierInit(THREAD_NUMBER*2);
+
     for ( int i = 0; i < THREAD_NUMBER; i++ )
     {
         if ( i == THREAD_NUMBER - 1 ) {
@@ -205,6 +209,9 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
     // Create thread Partion Jobs.
     current = 0;
     step = Rn / THREAD_NUMBER;
+
+    scheduler.barrierInit(THREAD_NUMBER * 2);
+
     for (int i = 0; i < THREAD_NUMBER; i++)
     {
         if (i == THREAD_NUMBER - 1)
@@ -395,7 +402,7 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
         delete bucketS;
         delete bucketR;
     }
-
+    
     // ----------------
     // |  THIRD PART  |
     // ----------------

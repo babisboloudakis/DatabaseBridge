@@ -1,6 +1,6 @@
 SOURCES = main.cpp read.cpp query.cpp parser.cpp filter.cpp optimize.cpp join.cpp scheduler.cpp
 OBJ = main.o read.o query.o parser.o filter.o optimize.o join.o scheduler.o
-PARAMS = -std=c++11 -lpthread
+PARAMS = -std=c++11 -lpthread -O3
 
 default: $(OBJ)
 	@g++ $(OBJ) -o main $(PARAMS)

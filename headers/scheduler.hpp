@@ -81,8 +81,7 @@ void* threadFunction();
 
 class JobScheduler {
 
-    private:
-
+    public:
     // Jobs queue
     vector<Job*> queue;
     // Thread pool
@@ -90,13 +89,16 @@ class JobScheduler {
     // Mutexes etc.
     pthread_mutex_t mutex;
     pthread_cond_t nonempty;
+    pthread_cond_t empty;
+    int jobCounter;
 
-  public:
     // Constructor and destructor methods
     inline JobScheduler() {
         // default
         this->mutex = PTHREAD_MUTEX_INITIALIZER;
         this->nonempty = PTHREAD_COND_INITIALIZER;
+        this->empty = PTHREAD_COND_INITIALIZER;
+        jobCounter = 0;
     }
 
     inline ~JobScheduler() {
@@ -110,6 +112,7 @@ class JobScheduler {
     // Returns true if everything done right false else.
     int destroy();
     // Wait for all threads to finish their job
+    void barrierInit(int);
     void barrier();
 
     // Job methods
