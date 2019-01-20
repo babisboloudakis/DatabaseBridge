@@ -30,7 +30,6 @@ class JobScheduler {
     pthread_t threads[THREAD_NUMBER];
     // Mutexes etc.
     pthread_mutex_t mutex;
-    pthread_mutex_t midResultsMutex;
     pthread_cond_t nonempty;
     pthread_cond_t empty;
     int jobCounter;
@@ -39,7 +38,6 @@ class JobScheduler {
     inline JobScheduler() {
         // default
         this->mutex = PTHREAD_MUTEX_INITIALIZER;
-        this->midResultsMutex = PTHREAD_MUTEX_INITIALIZER;
         this->nonempty = PTHREAD_COND_INITIALIZER;
         this->empty = PTHREAD_COND_INITIALIZER;
         jobCounter = 0;

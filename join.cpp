@@ -488,6 +488,7 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
     }
 
     scheduler.barrier();
+
     for (int bucketIndex = 0; bucketIndex < buckets; bucketIndex++){
         for (int i=0; i<threadResults[bucketIndex].res->size(); i++){
             for(int j=0; j<threadResults[bucketIndex].res->at(i).rowIds->size(); j++){
@@ -495,6 +496,7 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
             }
         }    
     }
+
     //------------------------
     
     // ----------------
@@ -542,6 +544,18 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
 
     delete values1;
     delete values2;
+
+
+    for ( int i = 0; i < buckets; i++ ) {
+        delete threadResults[i].rels;
+        delete threadResults[i].indexs;
+        for (int j = 0; j < threadResults[i].res->size(); j++ ){
+            delete threadResults[i].res->at(j).rowIds;
+        }
+        delete threadResults[i].res;
+    }
+    delete threadResults;
+
     // Replace with our new vectors
     return joinedMid;
 }
