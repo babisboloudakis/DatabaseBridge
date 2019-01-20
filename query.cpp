@@ -26,7 +26,6 @@ void Query::printResult(FileArray &fileArray){
                     cout << endl;
                     return;
                 }
-                
                 if (this->midResults.front().res->at(index).rowIds->size() == 0){
                     if (i == this->parser.selections.size() - 1)
                     {
@@ -96,7 +95,6 @@ void Query::computeFilters(FileArray & fileArray){
             for (uint64_t k=0; k < fileArray.getRowNum(res.relPos); k++){
                 res.rowIds->push_back(k);
             }
-            
             MidResult result;
             result.res = new vector<RelationResults>;
             result.res->push_back(res);
@@ -104,7 +102,6 @@ void Query::computeFilters(FileArray & fileArray){
             result.rels->push_back(res.relPos);
             result.indexs = new vector<int>;
             result.indexs->push_back(res.index);
-            
             this->midResults.push_back(result);
             index = midResults.size()-1;        
         }
@@ -114,7 +111,6 @@ void Query::computeFilters(FileArray & fileArray){
             // do nothing
             continue;
         }
-
         if (this->parser.filters[i].op == FilterInfo::FilterOperation::LESS){
             //NONE
             if(fileArray.getColMin(this->parser.filters[i].rel, this->parser.filters[i].col) >= this->parser.filters[i].constant){
@@ -144,7 +140,6 @@ void Query::computeFilters(FileArray & fileArray){
     }
     
 }
-
 
 void Query::computeJoins(FileArray &fileArray){
  
@@ -189,13 +184,6 @@ void Query::computeJoins(FileArray &fileArray){
             // Push new mid result into mid results
             midResults.push_back(tempMid);
             index1 = midResults.size() - 1;
-        }
-        // if we join same relations
-        //change..##########
-        if ( leftIndex == rightIndex ) {
-            // SELF JOIN
-            this->joins.join(midResults[index1], this->parser.joins[joinIndex], fileArray );
-            continue;
         }
         // if rel2 wasn't found, create midResult
         if ( index2 == -1 ) {
@@ -294,20 +282,14 @@ void Query::computeSelfJoins(FileArray &fileArray){
 void Query::computeQuery(FileArray & fileArray, string & line) {
     //parse Query info
     this->parser.parseQuery(line);
-    //debug
-    // this->printParseInfo();
     //rearange computations (optimize)
     this->optimize.optimizeQuery(fileArray, this->parser);
     //do computations
     //compute Filters first
-    // cout << "Filters" << endl;
     this->computeFilters(fileArray);
     //compute Joins after
-    // cout << "Filters" << endl;
     this->computeSelfJoins(fileArray);
-    // cout << "Joins" << endl;
     this->computeJoins(fileArray);
     //print results to std::out
-    // cout << "Print" << endl;
     this->printResult(fileArray);
 }

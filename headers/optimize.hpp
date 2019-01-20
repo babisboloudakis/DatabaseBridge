@@ -28,8 +28,6 @@ typedef struct Stats {
         distinct = a.distinct;
         return a;
     }
-
-
 } Stats;
 
 typedef struct RelInfo {
@@ -37,7 +35,6 @@ typedef struct RelInfo {
     int index;
     vector<Stats> relStats;
 } RelInfo;
-
 
 typedef struct MapData {
     vector<JoinInfo> joins;
@@ -52,7 +49,6 @@ typedef struct MapData {
     }
 } MapData;
 
-
 class Optimize{
     public:
 
@@ -62,10 +58,6 @@ class Optimize{
     Optimize(){
         this->relcnt = 0;
     };
-    
-    // Optimize(int relcnt, vector<FilterInfo> & filters) : relcnt(relcnt){
-        
-    // };
 
     ~Optimize(){};
     

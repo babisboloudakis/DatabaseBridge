@@ -37,12 +37,8 @@ class Query {
 
     void computeQuery(FileArray & fileArray, string & line);
     private:
-    //fnct -> prakseis((min, max)fliters->midresults epilogh twn joins->joins diaxeirish mid result)
     void computeFilters(FileArray & fileArray);
     void computeJoins(FileArray & fileArray);
     void computeSelfJoins(FileArray &fileArray);
     void printResult(FileArray & fileArray);
-    //applyfiter(&RelationResults, col, &fileArray ) (vector[2],f)
-    //applyjoin to diff()
-    //apply join to same()
 };
