@@ -263,7 +263,6 @@ void JoinJob::execute()
             }
         }
     }
-
     // Delete allocated data structures.
     delete chain;
     delete bucketArray;

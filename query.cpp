@@ -28,8 +28,14 @@ void Query::printResult(FileArray &fileArray){
                 }
                 
                 if (this->midResults.front().res->at(index).rowIds->size() == 0){
-                    // cout << selections[i].rel << " : " << "NULL" << endl;
-                    cout << "NULL ";
+                    if (i == this->parser.selections.size() - 1)
+                    {
+                        cout << "NULL";
+                    }
+                    else
+                    {
+                        cout << "NULL" << " ";
+                    }
                     continue;
                 }
                 val = fileArray.findColByRowIds(*(this->midResults.front().res->at(index).rowIds), this->parser.selections[i].col, this->midResults.front().res->at(index).relPos);
@@ -42,8 +48,11 @@ void Query::printResult(FileArray &fileArray){
                     sum += (*val)[k];
                 }
                 delete(val);
-                // cout << "rel: " << selections[i].rel << " ,col: " << this->parser.selections[i].col << " ,sum: " << sum << endl;
-                cout << sum << " ";
+                if ( i == this->parser.selections.size() - 1) {
+                    cout << sum;
+                } else {
+                    cout << sum << " ";
+                }
             }
             else{
                 cerr << "No relations in mid result to print" << endl;
