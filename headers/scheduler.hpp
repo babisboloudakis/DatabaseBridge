@@ -123,17 +123,14 @@ class JoinJob : public Job
     unsigned int *HistogramS;
     package *bucketR;
     package *bucketS;
-    uint64_t *bucketArray;
-    MidResult *joinedMid;
+    MidResult &joinedMid;
     MidResult &results1;
     MidResult &results2;
     int bucketIndex;
-    int offsetR;
-    int offsetS;
 
     // Job Constructor.
-    JoinJob(unsigned int *HistogramR, unsigned int *HistogramS, package *bucketR, package *bucketS, uint64_t *bucketArray, MidResult *joinedMid, MidResult &results1, MidResult &results2, int bucketIndex, int offsetR, int offsetS)
-        : HistogramR(HistogramR), HistogramS(HistogramS), bucketR(bucketR), bucketS(bucketS), bucketArray(bucketArray), joinedMid(joinedMid), results1(results1), results2(results2), bucketIndex(bucketIndex), offsetR(offsetR), offsetS(offsetS) {}
+    JoinJob(unsigned int *HistogramR, unsigned int *HistogramS, package *bucketR, package *bucketS, MidResult &joinedMid, MidResult &results1, MidResult &results2, int bucketIndex)
+        : HistogramR(HistogramR), HistogramS(HistogramS), bucketR(bucketR), bucketS(bucketS), joinedMid(joinedMid), results1(results1), results2(results2), bucketIndex(bucketIndex) {}
     // Job join method.
     void execute();
 };

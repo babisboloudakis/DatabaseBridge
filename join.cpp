@@ -32,32 +32,32 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
             index2 = i;
     }
 
-    // New vector with results after joining
-    MidResult *joinedMid = new MidResult;
-    joinedMid->rels = new vector<int>;
-    joinedMid->indexs = new vector<int>;
-    joinedMid->res = new vector<RelationResults>;
+    // // New vector with results after joining
+    // MidResult *joinedMid = new MidResult;
+    // joinedMid->rels = new vector<int>;
+    // joinedMid->indexs = new vector<int>;
+    // joinedMid->res = new vector<RelationResults>;
 
-    // Initialize relations in new mid result
-    for (int i = 0; i < results1.rels->size(); i++)
-    {
-        joinedMid->rels->push_back(results1.rels->at(i));
-        joinedMid->indexs->push_back(results1.indexs->at(i));
-    }
-    for (int i = 0; i < results2.rels->size(); i++)
-    {
-        joinedMid->rels->push_back(results2.rels->at(i));
-        joinedMid->indexs->push_back(results2.indexs->at(i));
-    }
-    // Initialize relation into new mid result
-    for (int i = 0; i < joinedMid->rels->size(); i++)
-    {
-        RelationResults relation;
-        relation.relPos = joinedMid->rels->at(i);
-        relation.index = joinedMid->indexs->at(i);
-        relation.rowIds = new vector<uint64_t>;
-        joinedMid->res->push_back(relation);
-    }
+    // // Initialize relations in new mid result
+    // for (int i = 0; i < results1.rels->size(); i++)
+    // {
+    //     joinedMid->rels->push_back(results1.rels->at(i));
+    //     joinedMid->indexs->push_back(results1.indexs->at(i));
+    // }
+    // for (int i = 0; i < results2.rels->size(); i++)
+    // {
+    //     joinedMid->rels->push_back(results2.rels->at(i));
+    //     joinedMid->indexs->push_back(results2.indexs->at(i));
+    // }
+    // // Initialize relation into new mid result
+    // for (int i = 0; i < joinedMid->rels->size(); i++)
+    // {
+    //     RelationResults relation;
+    //     relation.relPos = joinedMid->rels->at(i);
+    //     relation.index = joinedMid->indexs->at(i);
+    //     relation.rowIds = new vector<uint64_t>;
+    //     joinedMid->res->push_back(relation);
+    // }
 
     // Use the two vectors to create relations structs
     relation relR;
@@ -249,156 +249,254 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
     int offsetR = 0;
     int offsetS = 0;
 
-    //for loop
-    for (temp = 0; temp < buckets; temp++)
+    // //for loop
+    // for (temp = 0; temp < buckets; temp++)
+    // {
+
+    //     //initialize bucket arrays
+    //     package *bucketR = new package[HistogramR[temp]];
+    //     package *bucketS = new package[HistogramS[temp]];
+
+    //     for (int i = 0; i < HistogramR[temp]; i++)
+    //     {
+    //         bucketR[i] = Rt[i + offsetR];
+    //     }
+    //     for (int i = 0; i < HistogramS[temp]; i++)
+    //     {
+    //         bucketS[i] = St[i + offsetS];
+    //     }
+    //     //initialize bucketArray
+    //     uint64_t *bucketArray = new uint64_t[PRIME];
+    //     for (int i = 0; i < PRIME; i++)
+    //     {
+    //         bucketArray[i] = 0;
+    //     }
+    //     uint64_t last;
+    //     //select smallest bucket
+    //     if (HistogramR[temp] <= HistogramS[temp])
+    //     {
+    //         uint64_t *chain = new uint64_t[HistogramR[temp]];
+    //         for (int i = 0; i < HistogramR[temp]; i++)
+    //         {
+    //             uint64_t bucket = HashFunction2(bucketR[i].payload); // bucket for that payload
+    //             last = bucketArray[bucket];
+    //             bucketArray[bucket] = i + 1;
+    //             chain[i] = last;
+    //         }
+    //         //go to other bucket
+    //         for (int i = 0; i < HistogramS[temp]; i++)
+    //         {
+    //             uint64_t bucket = HashFunction2(bucketS[i].payload); // bucket for that payload
+    //             if ((last = bucketArray[bucket]) != 0)
+    //             { //if there is a hash
+    //                 if (bucketR[last - 1].payload == bucketS[i].payload)
+    //                 { //if there is a match
+    //                     //add to result
+    //                     int ind1 = bucketR[last - 1].index;
+    //                     int ind2 = bucketS[i].index;
+    //                     for (int k = 0; k < joinedMid->rels->size(); k++)
+    //                     {
+    //                         if (k < results1.rels->size())
+    //                         {
+    //                             joinedMid->res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
+    //                         }
+    //                         else
+    //                         {
+    //                             joinedMid->res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
+    //                         }
+    //                     }
+    //                 }
+    //                 //go to next
+    //                 while (chain[last - 1] != 0)
+    //                 {
+    //                     last = chain[last - 1];
+    //                     if (bucketR[last - 1].payload == bucketS[i].payload)
+    //                     {
+    //                         //add to result
+    //                         int ind1 = bucketR[last - 1].index;
+    //                         int ind2 = bucketS[i].index;
+    //                         for (int k = 0; k < joinedMid->rels->size(); k++)
+    //                         {
+    //                             if (k < results1.rels->size())
+    //                             {
+    //                                 joinedMid->res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
+    //                             }
+    //                             else
+    //                             {
+    //                                 joinedMid->res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
+    //                             }
+    //                         }
+    //                         // delete result;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         delete chain;
+    //     }
+    //     else
+    //     {
+    //         uint64_t *chain = new uint64_t[HistogramS[temp]];
+    //         for (int i = 0; i < HistogramS[temp]; i++)
+    //         {
+    //             uint64_t bucket = HashFunction2(bucketS[i].payload); // bucket for that payload
+    //             uint64_t last = bucketArray[bucket];
+    //             bucketArray[bucket] = i + 1;
+    //             chain[i] = last;
+    //         }
+    //         //go to other bucket
+    //         for (int i = 0; i < HistogramR[temp]; i++)
+    //         {
+    //             uint64_t bucket = HashFunction2(bucketR[i].payload); // bucket for that payload
+    //             if ((last = bucketArray[bucket]) != 0)
+    //             { //if there is a hash
+    //                 if (bucketS[last - 1].payload == bucketR[i].payload)
+    //                 { //if there is a match
+    //                     //add to result
+    //                     int ind1 = bucketR[i].index;
+    //                     int ind2 = bucketS[last - 1].index;
+    //                     for (int k = 0; k < joinedMid->rels->size(); k++)
+    //                     {
+    //                         if (k < results1.rels->size())
+    //                         {
+    //                             joinedMid->res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
+    //                         }
+    //                         else
+    //                         {
+    //                             joinedMid->res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
+    //                         }
+    //                     }
+    //                 }
+    //                 //go to next
+    //                 while (chain[last - 1] != 0)
+    //                 {
+    //                     last = chain[last - 1];
+    //                     if (bucketS[last - 1].payload == bucketR[i].payload)
+    //                     {
+    //                         //add to result
+    //                         int ind1 = bucketR[i].index;
+    //                         int ind2 = bucketS[last - 1].index;
+    //                         for (int k = 0; k < joinedMid->rels->size(); k++)
+    //                         {
+    //                             if (k < results1.rels->size())
+    //                             {
+    //                                 joinedMid->res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
+    //                             }
+    //                             else
+    //                             {
+    //                                 joinedMid->res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
+    //                             }
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         delete chain;
+    //     }
+    //     offsetR = offsetR + HistogramR[temp];
+    //     offsetS = offsetS + HistogramS[temp];
+    //     delete bucketArray;
+    //     delete bucketS;
+    //     delete bucketR;
+    // }
+
+
+    //------------------------
+
+    scheduler.barrierInit(buckets);
+    
+    // New vector with results after joining
+    MidResult *joinedMid = new MidResult;
+    joinedMid->rels = new vector<int>;
+    joinedMid->indexs = new vector<int>;
+    joinedMid->res = new vector<RelationResults>;
+
+    // Initialize relations in new mid result
+    for (int i = 0; i < results1.rels->size(); i++)
     {
+        joinedMid->rels->push_back(results1.rels->at(i));
+        joinedMid->indexs->push_back(results1.indexs->at(i));
+    }
+    for (int i = 0; i < results2.rels->size(); i++)
+    {
+        joinedMid->rels->push_back(results2.rels->at(i));
+        joinedMid->indexs->push_back(results2.indexs->at(i));
+    }
+    // Initialize relation into new mid result
+    for (int i = 0; i < joinedMid->rels->size(); i++)
+    {
+        RelationResults relation;
+        relation.relPos = joinedMid->rels->at(i);
+        relation.index = joinedMid->indexs->at(i);
+        relation.rowIds = new vector<uint64_t>;
+        joinedMid->res->push_back(relation);
+    }
+    MidResult* threadResults = new MidResult[buckets];
+    for (int bucketIndex = 0; bucketIndex < buckets; bucketIndex++)
+    {
+        threadResults[bucketIndex].rels = new vector<int>;
+        threadResults[bucketIndex].indexs = new vector<int>;
+        threadResults[bucketIndex].res = new vector<RelationResults>;
 
+        // Initialize relations in new mid result
+        for (int i = 0; i < results1.rels->size(); i++)
+        {
+            threadResults[bucketIndex].rels->push_back(results1.rels->at(i));
+            threadResults[bucketIndex].indexs->push_back(results1.indexs->at(i));
+        }
+        for (int i = 0; i < results2.rels->size(); i++)
+        {
+            threadResults[bucketIndex].rels->push_back(results2.rels->at(i));
+            threadResults[bucketIndex].indexs->push_back(results2.indexs->at(i));
+        }
+        // Initialize relation into new mid result
+        for (int i = 0; i < threadResults[bucketIndex].rels->size(); i++)
+        {
+            RelationResults relation;
+            relation.relPos = threadResults[bucketIndex].rels->at(i);
+            relation.index = threadResults[bucketIndex].indexs->at(i);
+            relation.rowIds = new vector<uint64_t>;
+            threadResults[bucketIndex].res->push_back(relation);
+        }      
+    }
+    //for loop
+    for (int bucketIndex = 0; bucketIndex < buckets; bucketIndex++)
+    {
         //initialize bucket arrays
-        package *bucketR = new package[HistogramR[temp]];
-        package *bucketS = new package[HistogramS[temp]];
+        package *bucketR = new package[HistogramR[bucketIndex]];
+        package *bucketS = new package[HistogramS[bucketIndex]];
 
-        for (int i = 0; i < HistogramR[temp]; i++)
+        for (int i = 0; i < HistogramR[bucketIndex]; i++)
         {
             bucketR[i] = Rt[i + offsetR];
         }
-        for (int i = 0; i < HistogramS[temp]; i++)
+        for (int i = 0; i < HistogramS[bucketIndex]; i++)
         {
             bucketS[i] = St[i + offsetS];
         }
-        //initialize bucketArray
-        uint64_t *bucketArray = new uint64_t[PRIME];
-        for (int i = 0; i < PRIME; i++)
-        {
-            bucketArray[i] = 0;
-        }
-        uint64_t last;
-        //select smallest bucket
-        if (HistogramR[temp] <= HistogramS[temp])
-        {
-            uint64_t *chain = new uint64_t[HistogramR[temp]];
-            for (int i = 0; i < HistogramR[temp]; i++)
-            {
-                uint64_t bucket = HashFunction2(bucketR[i].payload); // bucket for that payload
-                last = bucketArray[bucket];
-                bucketArray[bucket] = i + 1;
-                chain[i] = last;
-            }
-            //go to other bucket
-            for (int i = 0; i < HistogramS[temp]; i++)
-            {
-                uint64_t bucket = HashFunction2(bucketS[i].payload); // bucket for that payload
-                if ((last = bucketArray[bucket]) != 0)
-                { //if there is a hash
-                    if (bucketR[last - 1].payload == bucketS[i].payload)
-                    { //if there is a match
-                        //add to result
-                        int ind1 = bucketR[last - 1].index;
-                        int ind2 = bucketS[i].index;
-                        for (int k = 0; k < joinedMid->rels->size(); k++)
-                        {
-                            if (k < results1.rels->size())
-                            {
-                                joinedMid->res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
-                            }
-                            else
-                            {
-                                joinedMid->res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
-                            }
-                        }
-                    }
-                    //go to next
-                    while (chain[last - 1] != 0)
-                    {
-                        last = chain[last - 1];
-                        if (bucketR[last - 1].payload == bucketS[i].payload)
-                        {
-                            //add to result
-                            int ind1 = bucketR[last - 1].index;
-                            int ind2 = bucketS[i].index;
-                            for (int k = 0; k < joinedMid->rels->size(); k++)
-                            {
-                                if (k < results1.rels->size())
-                                {
-                                    joinedMid->res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
-                                }
-                                else
-                                {
-                                    joinedMid->res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
-                                }
-                            }
-                            // delete result;
-                        }
-                    }
-                }
-            }
-            delete chain;
-        }
-        else
-        {
-            uint64_t *chain = new uint64_t[HistogramS[temp]];
-            for (int i = 0; i < HistogramS[temp]; i++)
-            {
-                uint64_t bucket = HashFunction2(bucketS[i].payload); // bucket for that payload
-                uint64_t last = bucketArray[bucket];
-                bucketArray[bucket] = i + 1;
-                chain[i] = last;
-            }
-            //go to other bucket
-            for (int i = 0; i < HistogramR[temp]; i++)
-            {
-                uint64_t bucket = HashFunction2(bucketR[i].payload); // bucket for that payload
-                if ((last = bucketArray[bucket]) != 0)
-                { //if there is a hash
-                    if (bucketS[last - 1].payload == bucketR[i].payload)
-                    { //if there is a match
-                        //add to result
-                        int ind1 = bucketR[i].index;
-                        int ind2 = bucketS[last - 1].index;
-                        for (int k = 0; k < joinedMid->rels->size(); k++)
-                        {
-                            if (k < results1.rels->size())
-                            {
-                                joinedMid->res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
-                            }
-                            else
-                            {
-                                joinedMid->res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
-                            }
-                        }
-                    }
-                    //go to next
-                    while (chain[last - 1] != 0)
-                    {
-                        last = chain[last - 1];
-                        if (bucketS[last - 1].payload == bucketR[i].payload)
-                        {
-                            //add to result
-                            int ind1 = bucketR[i].index;
-                            int ind2 = bucketS[last - 1].index;
-                            for (int k = 0; k < joinedMid->rels->size(); k++)
-                            {
-                                if (k < results1.rels->size())
-                                {
-                                    joinedMid->res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
-                                }
-                                else
-                                {
-                                    joinedMid->res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            delete chain;
-        }
-        offsetR = offsetR + HistogramR[temp];
-        offsetS = offsetS + HistogramS[temp];
-        delete bucketArray;
-        delete bucketS;
-        delete bucketR;
+        // //initialize bucketArray
+        // uint64_t *bucketArray = new uint64_t[PRIME];
+        // for (int i = 0; i < PRIME; i++)
+        // {
+        //     bucketArray[i] = 0;
+        // }
+
+        // THREADS HERE
+        scheduler.schedule( new JoinJob(HistogramR, HistogramS, bucketR, bucketS, threadResults[bucketIndex], results1, results2, bucketIndex ) );
+        offsetR = offsetR + HistogramR[bucketIndex];
+        offsetS = offsetS + HistogramS[bucketIndex];
+        
     }
 
+    scheduler.barrier();
+    for (int bucketIndex = 0; bucketIndex < buckets; bucketIndex++){
+        for (int i=0; i<threadResults[bucketIndex].res->size(); i++){
+            for(int j=0; j<threadResults[bucketIndex].res->at(i).rowIds->size(); j++){
+                joinedMid->res->at(i).rowIds->push_back(threadResults[bucketIndex].res->at(i).rowIds->at(j));
+            }
+        }    
+    }
+    //------------------------
+    
     // ----------------
     // |  THIRD PART  |
     // ----------------

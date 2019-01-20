@@ -125,7 +125,12 @@ void JoinJob::execute()
 
     uint64_t last;
     uint64_t *chain;
-
+    //initialize bucketArray
+    uint64_t *bucketArray = new uint64_t[PRIME];
+    for (int i = 0; i < PRIME; i++)
+    {
+        bucketArray[i] = 0;
+    }
     //select smallest bucket
     if (HistogramR[bucketIndex] <= HistogramS[bucketIndex])
     {
@@ -148,21 +153,23 @@ void JoinJob::execute()
                     //add to result
                     int ind1 = bucketR[last - 1].index;
                     int ind2 = bucketS[i].index;
-                    for (int k = 0; k < joinedMid->rels->size(); k++)
+                    // pthread_mutex_lock(&scheduler.midResultsMutex);
+                    for (int k = 0; k < joinedMid.rels->size(); k++)
                     {
                         if (k < results1.rels->size())
                         {
-                            pthread_mutex_lock(&scheduler.midResultsMutex);
-                            joinedMid->res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
-                            pthread_mutex_unlock(&scheduler.midResultsMutex);
+                            // pthread_mutex_lock(&scheduler.midResultsMutex);
+                            joinedMid.res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
+                            // pthread_mutex_unlock(&scheduler.midResultsMutex);
                         }
                         else
                         {
-                            pthread_mutex_lock(&scheduler.midResultsMutex);
-                            joinedMid->res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
-                            pthread_mutex_unlock(&scheduler.midResultsMutex);
+                            // pthread_mutex_lock(&scheduler.midResultsMutex);
+                            joinedMid.res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
+                            // pthread_mutex_unlock(&scheduler.midResultsMutex);
                         }
                     }
+                    // pthread_mutex_unlock(&scheduler.midResultsMutex);
                 }
                 //go to next
                 while (chain[last - 1] != 0)
@@ -176,21 +183,23 @@ void JoinJob::execute()
                         // result->key2 = bucketS[i].key;
                         int ind1 = bucketR[last - 1].index;
                         int ind2 = bucketS[i].index;
-                        for (int k = 0; k < joinedMid->rels->size(); k++)
+                        // pthread_mutex_lock(&scheduler.midResultsMutex);
+                        for (int k = 0; k < joinedMid.rels->size(); k++)
                         {
                             if (k < results1.rels->size())
                             {
-                                pthread_mutex_lock(&scheduler.midResultsMutex);
-                                joinedMid->res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
-                                pthread_mutex_unlock(&scheduler.midResultsMutex);
+                                // pthread_mutex_lock(&scheduler.midResultsMutex);
+                                joinedMid.res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
+                                // pthread_mutex_unlock(&scheduler.midResultsMutex);
                             }
                             else
                             {
-                                pthread_mutex_lock(&scheduler.midResultsMutex);
-                                joinedMid->res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
-                                pthread_mutex_unlock(&scheduler.midResultsMutex);
+                                // pthread_mutex_lock(&scheduler.midResultsMutex);
+                                joinedMid.res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
+                                // pthread_mutex_unlock(&scheduler.midResultsMutex);
                             }
                         }
+                        // pthread_mutex_unlock(&scheduler.midResultsMutex);
                         // delete result;
                     }
                 }
@@ -218,21 +227,23 @@ void JoinJob::execute()
                     //add to result
                     int ind1 = bucketR[i].index;
                     int ind2 = bucketS[last - 1].index;
-                    for (int k = 0; k < joinedMid->rels->size(); k++)
+                    // pthread_mutex_lock(&scheduler.midResultsMutex);
+                    for (int k = 0; k < joinedMid.rels->size(); k++)
                     {
                         if (k < results1.rels->size())
                         {
-                            pthread_mutex_lock(&scheduler.midResultsMutex);
-                            joinedMid->res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
-                            pthread_mutex_unlock(&scheduler.midResultsMutex);
+                            // pthread_mutex_lock(&scheduler.midResultsMutex);
+                            joinedMid.res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
+                            // pthread_mutex_unlock(&scheduler.midResultsMutex);
                         }
                         else
                         {
-                            pthread_mutex_lock(&scheduler.midResultsMutex);
-                            joinedMid->res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
-                            pthread_mutex_unlock(&scheduler.midResultsMutex);
+                            // pthread_mutex_lock(&scheduler.midResultsMutex);
+                            joinedMid.res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
+                            // pthread_mutex_unlock(&scheduler.midResultsMutex);
                         }
                     }
+                    // pthread_mutex_unlock(&scheduler.midResultsMutex);
                 }
                 //go to next
                 while (chain[last - 1] != 0)
@@ -243,26 +254,30 @@ void JoinJob::execute()
                         //add to result
                         int ind1 = bucketR[i].index;
                         int ind2 = bucketS[last - 1].index;
-                        for (int k = 0; k < joinedMid->rels->size(); k++)
+                        // pthread_mutex_lock(&scheduler.midResultsMutex);
+                        for (int k = 0; k < joinedMid.rels->size(); k++)
                         {
                             if (k < results1.rels->size())
                             {
-                                pthread_mutex_lock(&scheduler.midResultsMutex);
-                                joinedMid->res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
-                                pthread_mutex_unlock(&scheduler.midResultsMutex);
+                                // pthread_mutex_lock(&scheduler.midResultsMutex);
+                                joinedMid.res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
+                                // pthread_mutex_unlock(&scheduler.midResultsMutex);
                             }
                             else
                             {
-                                pthread_mutex_lock(&scheduler.midResultsMutex);
-                                joinedMid->res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
-                                pthread_mutex_unlock(&scheduler.midResultsMutex);
+                                // pthread_mutex_lock(&scheduler.midResultsMutex);
+                                joinedMid.res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
+                                // pthread_mutex_unlock(&scheduler.midResultsMutex);
                             }
+                            
                         }
+                        // pthread_mutex_unlock(&scheduler.midResultsMutex);
                     }
                 }
             }
         }
     }
+
     // Delete allocated data structures.
     delete chain;
     delete bucketArray;
