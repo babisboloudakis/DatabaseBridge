@@ -14,9 +14,9 @@ void Query::printResult(FileArray &fileArray){
             int index=-1;
             vector<uint64_t> * val;
             uint64_t sum=0;
-            if (this->midResults.front().rels != NULL){
-                for (int k=0; k < this->midResults.front().rels->size(); k++){    
-                    if ( (*(this->midResults.front().rels))[k] == this->parser.selections[i].rel){
+            if (this->midResults.front().indexs != NULL){
+                for (int k=0; k < this->midResults.front().indexs->size(); k++){    
+                    if ( (*(this->midResults.front().indexs))[k] == this->parser.selections[i].index){
                         index=k;
                         break;    
                     }
@@ -69,8 +69,8 @@ void Query::computeFilters(FileArray & fileArray){
         int index=-1;
         
         for (int j=0; j<this->midResults.size(); j++){
-            if (this->midResults[j].rels != NULL){
-                if ( (*(this->midResults[j].rels)).front() == this->parser.filters[i].rel){
+            if (this->midResults[j].indexs != NULL){
+                if ( (*(this->midResults[j].indexs)).front() == this->parser.filters[i].index){
                     index=j;
                     break;    
                 }
@@ -80,6 +80,7 @@ void Query::computeFilters(FileArray & fileArray){
             RelationResults res ;
             res.relPos = this->parser.filters[i].rel;
             res.rowIds = new vector<uint64_t>;
+            res.index = this->parser.filters[i].index;
             for (uint64_t k=0; k < fileArray.getRowNum(res.relPos); k++){
                 res.rowIds->push_back(k);
             }
@@ -89,6 +90,8 @@ void Query::computeFilters(FileArray & fileArray){
             result.res->push_back(res);
             result.rels = new vector<int>;
             result.rels->push_back(res.relPos);
+            result.indexs = new vector<int>;
+            result.indexs->push_back(res.index);
             
             this->midResults.push_back(result);
             index = midResults.size()-1;        
@@ -138,15 +141,17 @@ void Query::computeJoins(FileArray &fileArray){
         // get rels to be joined
         int leftRel = this->parser.joins[joinIndex].rel1;
         int rightRel = this->parser.joins[joinIndex].rel2;
+        int leftIndex = this->parser.joins[joinIndex].index1;
+        int rightIndex = this->parser.joins[joinIndex].index2;
         // find midResult index for each rel
         int index1 = -1, index2 = -1;
         for ( int midIndex = 0; midIndex < midResults.size(); midIndex++ ) {
             // look for rels inside current midResults
-            for ( int relIndex = 0; relIndex < midResults[midIndex].rels->size(); relIndex++ ) {
-                if ( leftRel == midResults[midIndex].rels->at(relIndex) ) {
+            for ( int relIndex = 0; relIndex < midResults[midIndex].indexs->size(); relIndex++ ) {
+                if ( leftIndex == midResults[midIndex].indexs->at(relIndex) ) {
                     index1 = midIndex;
                 }
-                if ( rightRel == midResults[midIndex].rels->at(relIndex) ) {
+                if ( rightIndex == midResults[midIndex].indexs->at(relIndex) ) {
                     index2 = midIndex;
                 }
             }
@@ -156,6 +161,7 @@ void Query::computeJoins(FileArray &fileArray){
             // Create temporary result
             RelationResults res ;
             res.relPos = leftRel;
+            res.index = leftIndex;
             res.rowIds = new vector<uint64_t>;
             for (uint64_t k=0; k < fileArray.getRowNum(res.relPos); k++){
                 res.rowIds->push_back(k);
@@ -166,12 +172,15 @@ void Query::computeJoins(FileArray &fileArray){
             tempMid.res->push_back(res);
             tempMid.rels = new vector<int>;  
             tempMid.rels->push_back(leftRel);
+            tempMid.indexs = new vector<int>;  
+            tempMid.indexs->push_back(leftIndex);
             // Push new mid result into mid results
             midResults.push_back(tempMid);
             index1 = midResults.size() - 1;
         }
         // if we join same relations
-        if ( leftRel == rightRel ) {
+        //change..##########
+        if ( leftIndex == rightIndex ) {
             // SELF JOIN
             this->joins.join(midResults[index1], this->parser.joins[joinIndex], fileArray );
             continue;
@@ -181,6 +190,7 @@ void Query::computeJoins(FileArray &fileArray){
             // Create temporary result
             RelationResults res ;
             res.relPos = rightRel;
+            res.index = rightIndex;
             res.rowIds = new vector<uint64_t>;
             for (uint64_t k=0; k < fileArray.getRowNum(res.relPos); k++){
                 res.rowIds->push_back(k);
@@ -191,6 +201,8 @@ void Query::computeJoins(FileArray &fileArray){
             tempMid.res->push_back(res);
             tempMid.rels = new vector<int>;  
             tempMid.rels->push_back(rightRel);
+            tempMid.indexs = new vector<int>;  
+            tempMid.indexs->push_back(rightIndex);
             // Push new mid result into mid results
             midResults.push_back(tempMid);
             index2 = midResults.size() - 1;
@@ -217,6 +229,56 @@ void Query::computeJoins(FileArray &fileArray){
 
 }
 
+void Query::computeSelfJoins(FileArray &fileArray){
+    for ( int SelfIndex = 0; SelfIndex < this->parser.selfs.size(); SelfIndex++ ) {
+        // get rels to be joined
+        int rel = this->parser.selfs[SelfIndex].rel;
+        int index = this->parser.selfs[SelfIndex].index;
+        // find midResult index for each rel
+        int index1 = -1;
+        for ( int midIndex = 0; midIndex < midResults.size(); midIndex++ ) {
+            // look for rels inside current midResults
+            for ( int relIndex = 0; relIndex < midResults[midIndex].indexs->size(); relIndex++ ) {
+                if ( index == midResults[midIndex].indexs->at(relIndex) ) {
+                    index1 = midIndex;
+                }
+            }
+        }
+        // if rel1 wasn't found, create midResult
+        if ( index1 == -1 ) {
+            // Create temporary result
+            RelationResults res ;
+            res.relPos = rel;
+            res.index = index;
+            res.rowIds = new vector<uint64_t>;
+            for (uint64_t k=0; k < fileArray.getRowNum(res.relPos); k++){
+                res.rowIds->push_back(k);
+            }
+            // Create temp midResult
+            MidResult tempMid;
+            tempMid.res = new vector<RelationResults>;
+            tempMid.res->push_back(res);
+            tempMid.rels = new vector<int>;  
+            tempMid.rels->push_back(rel);
+            tempMid.indexs = new vector<int>;  
+            tempMid.indexs->push_back(index);
+            // Push new mid result into mid results
+            midResults.push_back(tempMid);
+            index1 = midResults.size() - 1;
+        }
+        
+        // SELF JOIN
+        JoinInfo tempJoin;
+        tempJoin.rel1 = rel;
+        tempJoin.rel2 = rel;
+        tempJoin.index1 = index;
+        tempJoin.index2 = index;
+        tempJoin.col1 = this->parser.selfs[SelfIndex].col1;
+        tempJoin.col2 = this->parser.selfs[SelfIndex].col2;
+        this->joins.join(midResults[index1], tempJoin, fileArray );
+    }    
+}
+
 void Query::computeQuery(FileArray & fileArray, string & line) {
     //parse Query info
     this->parser.parseQuery(line);
@@ -226,9 +288,14 @@ void Query::computeQuery(FileArray & fileArray, string & line) {
     this->optimize.optimizeQuery(fileArray, this->parser);
     //do computations
     //compute Filters first
+    // cout << "Filters" << endl;
     this->computeFilters(fileArray);
     //compute Joins after
+    // cout << "Filters" << endl;
+    this->computeSelfJoins(fileArray);
+    // cout << "Joins" << endl;
     this->computeJoins(fileArray);
     //print results to std::out
+    // cout << "Print" << endl;
     this->printResult(fileArray);
 }

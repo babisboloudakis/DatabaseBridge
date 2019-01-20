@@ -21,36 +21,40 @@ JobScheduler scheduler;
 MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, FileArray &fileArray)
 {
     int index1, index2;
-    for (int i = 0; i < results1.rels->size(); i++)
+    for (int i = 0; i < results1.indexs->size(); i++)
     {
-        if (results1.rels->at(i) == join.rel1)
+        if (results1.indexs->at(i) == join.index1)
             index1 = i;
     }
-    for (int i = 0; i < results2.rels->size(); i++)
+    for (int i = 0; i < results2.indexs->size(); i++)
     {
-        if (results2.rels->at(i) == join.rel2)
+        if (results2.indexs->at(i) == join.index2)
             index2 = i;
     }
 
     // New vector with results after joining
     MidResult *joinedMid = new MidResult;
     joinedMid->rels = new vector<int>;
+    joinedMid->indexs = new vector<int>;
     joinedMid->res = new vector<RelationResults>;
 
     // Initialize relations in new mid result
     for (int i = 0; i < results1.rels->size(); i++)
     {
         joinedMid->rels->push_back(results1.rels->at(i));
+        joinedMid->indexs->push_back(results1.indexs->at(i));
     }
     for (int i = 0; i < results2.rels->size(); i++)
     {
         joinedMid->rels->push_back(results2.rels->at(i));
+        joinedMid->indexs->push_back(results2.indexs->at(i));
     }
     // Initialize relation into new mid result
     for (int i = 0; i < joinedMid->rels->size(); i++)
     {
         RelationResults relation;
         relation.relPos = joinedMid->rels->at(i);
+        relation.index = joinedMid->indexs->at(i);
         relation.rowIds = new vector<uint64_t>;
         joinedMid->res->push_back(relation);
     }
@@ -424,7 +428,9 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
 
     // Delete of previous rowId vectors
     delete results1.rels;
+    delete results1.indexs;
     delete results2.rels;
+    delete results2.indexs;
     for (int i = 0; i < results1.res->size(); i++)
     {
         delete results1.res->at(i).rowIds;
@@ -449,21 +455,22 @@ void Join::join(MidResult & results, JoinInfo & join, FileArray & fileArray ){
     int index1;
     int index2;
     vector<uint64_t> * val1, *val2;
-    if((join.rel1 == join.rel2) && (join.col1 == join.col2)){
+    if((join.index1 == join.index2) && (join.col1 == join.col2)){
         return;
     }
     vector<RelationResults> * newRes = new vector<RelationResults>;
     for(int i=0; i < results.rels->size(); i++){
         RelationResults temp;
         temp.relPos = results.rels->at(i);
+        temp.index = results.indexs->at(i);
         temp.rowIds = new vector<uint64_t>;
         newRes->push_back(temp);
     }
-    for (int i=0; i<results.rels->size(); i++){
-        if ( results.rels->at(i) == join.rel1){
+    for (int i=0; i<results.indexs->size(); i++){
+        if ( results.indexs->at(i) == join.index1){
             index1 = i;
         }
-        if (results.rels->at(i) == join.rel2){
+        if (results.indexs->at(i) == join.index2){
             index2 = i;
         }
     }

@@ -44,6 +44,7 @@ typedef struct JoinInfo {
         index2 = a.index2;
         return a;
     }
+    JoinInfo(){};
 
 } JoinInfo;
 
