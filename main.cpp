@@ -9,7 +9,6 @@ int main(int argc, char* argv[]) {
 
     vector <string> fileNames;
     string line;
-    
     while (getline(cin, line)){
         if (line == "Done") break;
         fileNames.push_back(line);
