@@ -50,12 +50,13 @@ void Filter::filter( MidResult & results, FilterInfo & filter, FileArray & fileA
     vector<uint64_t> * values;
     vector<RelationResults> * newRes = new vector<RelationResults>;
 
-    for (int i=0; i < results.rels->size(); i++){
-        if (results.rels->at(i) == filter.rel){
+    for (int i=0; i < results.indexs->size(); i++){
+        if (results.indexs->at(i) == filter.index){
             index = i;
         }
         RelationResults temp;
         temp.relPos = results.rels->at(i);
+        temp.index = results.indexs->at(i);
         temp.rowIds = new vector<uint64_t>;
         newRes->push_back(temp);
     }     
@@ -68,7 +69,7 @@ void Filter::filter( MidResult & results, FilterInfo & filter, FileArray & fileA
             // Loop throught results and apply filter
             for ( int i = 0; i < values->size(); i++ ) {
                 if ( (*values)[index] < filter.constant ) { 
-                    for (int j=0; j<results.rels->size(); j++){
+                    for (int j=0; j<results.indexs->size(); j++){
                         newRes->at(j).rowIds->push_back(results.res->at(j).rowIds->at(i));
                     }
                 }
@@ -78,7 +79,7 @@ void Filter::filter( MidResult & results, FilterInfo & filter, FileArray & fileA
             // Loop throught results and apply filter
             for ( int i = 0; i < values->size(); i++ ) {
                 if ( (*values)[index] > filter.constant ) {
-                    for (int j=0; j<results.rels->size(); j++){
+                    for (int j=0; j<results.indexs->size(); j++){
                         newRes->at(j).rowIds->push_back(results.res->at(j).rowIds->at(i));
                     }
                 }
@@ -88,14 +89,14 @@ void Filter::filter( MidResult & results, FilterInfo & filter, FileArray & fileA
             // Loop throught results and apply filter
             for ( int i = 0; i < values->size(); i++ ) {
                 if ( (*values)[index] == filter.constant ) {
-                    for (int j=0; j<results.rels->size(); j++){
+                    for (int j=0; j<results.indexs->size(); j++){
                         newRes->at(j).rowIds->push_back(results.res->at(j).rowIds->at(i));
                     }
                 }
             }
             break;
     }
-    for (int j=0; j<results.rels->size(); j++){
+    for (int j=0; j<results.indexs->size(); j++){
         delete (results.res->at(j).rowIds);
     }
     delete (results.res);
