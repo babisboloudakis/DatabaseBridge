@@ -38,9 +38,6 @@ class Cell {
     };
 
     ~Cell(){
-        // for (int i=0; i < this->colNum; i++){
-        //     this->array[i].pointer  dont know what to do yet  
-        // }
         delete(this->array);
     };
 
@@ -111,27 +108,14 @@ class FileArray {
 
             uint64_t row = *(uint64_t *)addr;
             addr += sizeof(row);
-            // cout << "RowNum: " << row << endl;
             
             uint64_t col = *(uint64_t *)addr;
-            // cout << "ColNum: " << col << endl;
             addr += sizeof(col);
             this->cells[i] = new Cell(fileName[i], col, row);
-            
-            // string str[3];
-            // str[0] = "./f0.txt";
-            // str[1] = "./f1.txt";
-            // str[2] = "./f2.txt";
 
             for (int j=0; j<col; j++){
                 this->cells[i]->storeRow((uint64_t *)addr, j);
-                // ofstream myfile;
-                // myfile.open (str[j]);
-                // for(int k=0; k< row; k++){
-                //     myfile << *(uint64_t *)(addr + k*sizeof(uint64_t)) << endl;
-                // }
                 uint64_t data = *(uint64_t *)(addr + sizeof(uint64_t));
-                // cout << j << " col second data is: " << data << endl;
                 addr += row*sizeof(uint64_t);        
             }
             this->computeStatistics(i);

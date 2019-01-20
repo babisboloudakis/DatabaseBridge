@@ -521,9 +521,7 @@ uint64_t Optimize::cost(JoinInfo & join, vector<RelInfo> & rels){
     if (rels.at(0).relStats.at(0).size == 0){
         return 0;
     }
-    // cout << join.index1 << join.index2 << endl;
     for(int i=0; i<rels.size(); i++){
-        // cout << rels.at(i).index << endl;
 
         if (join.index1 == rels.at(i).index){
             pos1 = i;
@@ -532,27 +530,21 @@ uint64_t Optimize::cost(JoinInfo & join, vector<RelInfo> & rels){
             pos2 = i;
         }
     }
-    // cout << "all ok" << pos1 << " " << pos2 << endl;
     if (rels.at(pos1).relStats.at(join.col1).min > rels.at(pos2).relStats.at(join.col2).min ){
-        // cout << "all ok1" << endl;
         min = rels.at(pos1).relStats.at(join.col1).min;
     }
     else{
-        // cout << "all ok2" << endl;
         min = rels.at(pos2).relStats.at(join.col2).min;
     }
-    // cout << "all ok" << endl;
     if (rels.at(pos1).relStats.at(join.col1).max < rels.at(pos2).relStats.at(join.col2).max ){
         max = rels.at(pos1).relStats.at(join.col1).max;
     }
     else{
         max = rels.at(pos2).relStats.at(join.col2).max;
     }
-    // cout << "all ok" << endl;
     n=max-min+1;
     fa= (uint64_t)((double)rels.at(pos1).relStats.at(join.col1).size/(double)n);
     size=rels.at(pos1).relStats.at(join.col1).size;
-    // cout << "all ok" << endl;
     for (int i=0; i<rels.size(); i++){
         if (i == pos1){  //self rel1
             for (int j=0; j<rels.at(i).relStats.size(); j++){
@@ -590,9 +582,7 @@ uint64_t Optimize::cost(JoinInfo & join, vector<RelInfo> & rels){
                 rels.at(i).relStats.at(j).size = fa;
             }
         }
-        // cout << "all ok" << i << endl;
     }
-    // cout << "all ok" << endl;
     return rels.at(0).relStats.at(0).size;   
 }
 
@@ -638,169 +628,6 @@ uint64_t Optimize::cost(SelfInfo & join, RelInfo & relIn){
     
    return relIn.relStats.at(0).size;     
 }
-
-// uint64_t Optimize::cost_a(JoinInfo & join, vector<RelInfo> & rels1, vector<RelInfo> & rels2){
-//     Stats relStats1, relStats2;
-//     int pos1, pos2; 
-//     uint64_t n, d, s;
-//     if(rels1.at(0).relStats.at(0).size == 0 || rels2.at(0).relStats.at(0).size == 0 ){
-//         for (int i=0; i<rels1.size(); i++){    
-//             for (int j=0; j<rels1.at(i).relStats.size(); j++){
-//                 rels1.at(i).relStats.at(j).min = 0;
-//                 rels1.at(i).relStats.at(j).size = 0;
-//                 rels1.at(i).relStats.at(j).distinct = 0;
-//                 rels1.at(i).relStats.at(j).max = 0;    
-//             }      
-//         }
-//         for (int i=0; i<rels2.size(); i++){
-//             for (int j=0; j<rels2.at(i).relStats.size(); j++){
-//                 rels2.at(i).relStats.at(j).min = 0;
-//                 rels2.at(i).relStats.at(j).size = 0;
-//                 rels2.at(i).relStats.at(j).distinct = 0;
-//                 rels2.at(i).relStats.at(j).max = 0; 
-//             }
-//         } 
-//         return 0;   
-//     }
-//     for (int i=0; i<rels1.size(); i++){
-//         if (rels1.at(i).rel == join.rel1 && rels1.at(i).index == join.index1){
-//             pos1 = i;
-//             for (int j=0; j<rels1.at(i).relStats.size(); j++){
-//                 if (j == join.col1){
-//                     relStats1 = rels1.at(i).relStats.at(j);
-//                     break;
-//                 }
-                
-//             }
-//             break;
-//         }
-//     }
-//     for (int i=0; i<rels2.size(); i++){
-//         if (rels2.at(i).rel == join.rel2 && rels2.at(i).index == join.index2){
-//             pos2 = i;
-//             for (int j=0; j<rels2.at(i).relStats.size(); j++){
-//                 if (j == join.col2){
-//                     relStats2 = rels2.at(i).relStats.at(j);
-//                     break;
-//                 }
-//             }
-//             break;
-//         } 
-//     }
-
-//     n = relStats1.max - relStats2.min +1;
-//     d = (uint64_t)((double)(relStats1.distinct * relStats2.distinct) / (double)n);
-//     s = (uint64_t)((double)(relStats1.size * relStats2.size) / (double)n);
-
-//     for (int i=0; i<rels1.size(); i++){
-//         if (pos1 == i){
-//             for (int j=0; j<rels1.at(i).relStats.size(); j++){
-//                 if (j == join.col1){
-//                    rels1.at(i).relStats.at(j).distinct = rels1.at(i).relStats.at(j).distinct;
-//                    rels1.at(i).relStats.at(j).size = s;
-//                 }
-//                 else{
-//                     rels1.at(i).relStats.at(j).distinct = rels1.at(i).relStats.at(j).distinct;
-//                     rels1.at(i).relStats.at(j).size = s;
-//                 }
-//             }
-//         }
-//         else{
-//             for (int j=0; j<rels1.at(i).relStats.size(); j++){
-//                 rels1.at(i).relStats.at(j).distinct = rels1.at(i).relStats.at(j).distinct;
-//                 rels1.at(i).relStats.at(j).size = s;
-//             }
-//         }
-//     }
-//     for(int i=0; i<rels2.size(); i++){
-//         if (pos2 == i){
-//             for (int j=0; j<rels2.at(i).relStats.size(); j++){
-//                 if (j == join.col2){
-//                    rels2.at(i).relStats.at(j).distinct = rels1.at(i).relStats.at(j).distinct;
-//                    rels2.at(i).relStats.at(j).size = s;
-//                 }
-//                 else{
-//                     rels2.at(i).relStats.at(j).distinct = rels1.at(i).relStats.at(j).distinct;
-//                     rels2.at(i).relStats.at(j).size = s;
-//                 }
-                
-//             }
-//         }
-//         else{
-//             for (int j=0; j<rels2.at(i).relStats.size(); j++){
-//                 rels2.at(i).relStats.at(j).distinct = rels1.at(i).relStats.at(j).distinct;
-//                 rels2.at(i).relStats.at(j).size = s;
-//             }
-//         }
-//     }
-//     return rels1.at(0).relStats.at(0).size;
-// }
-
-// uint64_t Optimize::cost_a(JoinInfo & join, RelInfo & rels1, RelInfo & rels2){
-//     Stats relStats1, relStats2; 
-//     uint64_t n, d, s;
-//     if(rels1.relStats.at(0).size == 0 || rels2.relStats.at(0).size == 0 ){
-//         for (int j=0; j<rels1.relStats.size(); j++){
-//             rels1.relStats.at(j).min = 0;
-//             rels1.relStats.at(j).size = 0;
-//             rels1.relStats.at(j).distinct = 0;
-//             rels1.relStats.at(j).max = 0;    
-//         }      
-    
-//         for (int j=0; j<rels2.relStats.size(); j++){
-//             rels2.relStats.at(j).min = 0;
-//             rels2.relStats.at(j).size = 0;
-//             rels2.relStats.at(j).distinct = 0;
-//             rels2.relStats.at(j).max = 0; 
-//         }
-//         return 0;   
-//     }
-//     if (rels1.rel == join.rel1 && rels1.index == join.index1){ 
-//         for (int j=0; j<rels1.relStats.size(); j++){
-//             if (j == join.col1){
-//                 relStats1 = rels1.relStats.at(j);
-//                 break;
-//             } 
-//         }
-        
-//     }
-    
-//     if (rels2.rel == join.rel2 && rels2.index == join.index2){ 
-//         for (int j=0; j<rels2.relStats.size(); j++){
-//             if (j == join.col2){
-//                 relStats2 = rels2.relStats.at(j);
-//                 break;
-//             }
-//         }    
-//     }
-    
-//     n = relStats1.max - relStats1.min +1;
-    
-//     d = (uint64_t)((double)(relStats1.distinct * relStats2.distinct) / (double)n);
-//     s = (uint64_t)((double)(relStats1.size * relStats2.size) / (double)n);
-    
-//     for (int j=0; j<rels1.relStats.size(); j++){
-//         if (j == join.col1){
-//             rels1.relStats.at(j).distinct = rels1.relStats.at(j).distinct;
-//             rels1.relStats.at(j).size = s;
-//         }
-//         else{
-//             rels1.relStats.at(j).distinct = rels1.relStats.at(j).distinct;
-//             rels1.relStats.at(j).size = s;
-//         }
-//     }
-//     for (int j=0; j<rels2.relStats.size(); j++){
-//         if (j == join.col2){
-//             rels2.relStats.at(j).distinct = rels1.relStats.at(j).distinct;
-//             rels2.relStats.at(j).size = s;
-//         }
-//         else{
-//             rels2.relStats.at(j).distinct = rels1.relStats.at(j).distinct;
-//             rels2.relStats.at(j).size = s;
-//         } 
-//     }
-//     return rels1.relStats.at(0).size;    
-// }
 
 void Optimize::getRelStats(FileArray & fileArray, Parser & parser){
     this->relcnt = parser.relations.size();
@@ -911,15 +738,7 @@ void Optimize::optimizeJoins(vector<JoinInfo> & joins){
                 this->cost(tempFilter, tempRel2);
                 }
                 
-                //update cost
-                // if(tempRel1.rel == tempRel2.rel && tempJoin.at(j).col1 == tempJoin.at(j).col2){
-                //     //autojoin
-                //     tempMap.cost = cost_a(tempJoin.at(j), tempRel1, tempRel2);
-                // }
-                // else{
-                    //normal join
-                    tempMap.cost = cost(tempJoin.at(j), tempRel1, tempRel2);
-                // }
+                tempMap.cost = cost(tempJoin.at(j), tempRel1, tempRel2);
                 
                 //push modified rels
                 tempMap.joinedRels.push_back(tempRel1);
@@ -929,12 +748,10 @@ void Optimize::optimizeJoins(vector<JoinInfo> & joins){
                 if (minMap.joins.size() == 0){
                     minMap = tempMap;
                     mincost = tempMap.cost;
-                    // id = map.size()-1;
                 }
                 else if(mincost > tempMap.cost){
                     minMap = tempMap;
                     mincost = tempMap.cost;
-                    // id = map.size()-1;
                 }
                 //delete joinInfo for no duplicates
                 tempJoin.erase(tempJoin.begin() + j);
@@ -943,13 +760,6 @@ void Optimize::optimizeJoins(vector<JoinInfo> & joins){
         }
     }
 
-    // cout << "mincost is: " << mincost << " in id: " << id << endl;
-    //pick lowest cost duo
-    // minMap = map.at(id);
-    // cout << minMap.cost << " " << minMap.joins.size() << " " << minMap.joinedRels.size() << endl;
-    // map.clear();
-    // map.push_back(minMap);
-    
     int cnt = 1;
     //get all triples quadruples etc until there are no new joinInfo to be included 
     
@@ -965,12 +775,10 @@ void Optimize::optimizeJoins(vector<JoinInfo> & joins){
                     break;
                 }
             }
-            // cout << fl << endl;
             if (fl) continue;
             //if not skipped
             
             int joinid2 = -1;
-
             for(int j=0; j<tempMap.joinedRels.size(); j++){
                 //if rel in common
                 if (tempMap.joinedRels.at(j).index == joins.at(i).index1){
@@ -994,106 +802,47 @@ void Optimize::optimizeJoins(vector<JoinInfo> & joins){
                 }
                 if (flag == 1){
                     //self join
-                    // cout << "joind2 " << joinid2 << endl;
-                    // cout << tempMap.joinedRels.at(0).index  << " " << tempMap.joinedRels.at(1).index << endl;
-                    // cout << joins.at(i).index1  << " " << joins.at(i).index2 << endl;
                     if(map.joins.size() == 0){
-                        // cout << "First self" << endl;
                         map=tempMap;
                         map.cost = this->cost(joins.at(i), map.joinedRels);
                         map.joins.push_back(joins.at(i));
                         minMap=map;
-                        // cout << "map join: " << map.joins.size() << " minmap join: " << minMap.joins.size() << endl;
                     }
                     else{
-                        // cout << "----self----" << endl;
                         map=tempMap;
-                        // cout << "trying to realise" << endl;
                         map.cost = this->cost(joins.at(i), map.joinedRels);
-                        // cout << "wtf is going on?" << endl;
                         map.joins.push_back(joins.at(i));
                         if(minMap.cost > map.cost){
                             minMap=map;   
-                            // cout << "map join: " << map.joins.size() << " minmap join: " << minMap.joins.size() << endl; 
                         }
                     }
                 }
                 else{
-                    // if(joins.at(i).rel1 == joins.at(i).rel2 && joins.at(i).col1 == joins.at(i).col2){
-                    //     //auto join
-                    //     // cout<< "+++++++++++++++++++++++++++++++++" << endl;
-                    //     if(map.joins.size() == 0){
-                    //         // cout << "+++First auto" << endl;
-                    //         map=tempMap;
-                    //         rel.push_back(this->rels.at(joinid2));
-                    //         map.cost = this->cost_a(joins.at(i), map.joinedRels, rel);
-                    //         map.joins.push_back(joins.at(i));
-                    //         map.joinedRels.push_back(rel.at(0));
-                    //         minMap=map;
-                    //         // cout << "map join: " << map.joins.size() << " minmap join: " << minMap.joins.size() << endl;
-                    //     }
-                    //     else{
-                    //         cout << "auto++++" << endl;
-                    //         map=tempMap;
-                    //         rel.push_back(this->rels.at(joinid2));
-                    //         map.cost += this->cost_a(joins.at(i), map.joinedRels, rel);
-                    //         map.joins.push_back(joins.at(i));
-                    //         map.joinedRels.push_back(rel.at(0));
-                    //         if(minMap.cost > map.cost){
-                    //             minMap=map;  
-                    //             // cout << "map join: " << map.joins.size() << " minmap join: " << minMap.joins.size() << endl;  
-                    //         }
-                    //     }
-                    // }
-                    // else{
-                        //normal join
-                        if(map.joins.size() == 0){
-                            // cout << "First normal" << endl;
-                            map=tempMap;
-                            rel.push_back(this->rels.at(joinid2));
-                            map.cost += this->cost(joins.at(i), map.joinedRels, rel);
-                            map.joins.push_back(joins.at(i));
-                            map.joinedRels.push_back(rel.at(0));
+                    //normal join
+                    if(map.joins.size() == 0){
+                        map=tempMap;
+                        rel.push_back(this->rels.at(joinid2));
+                        map.cost += this->cost(joins.at(i), map.joinedRels, rel);
+                        map.joins.push_back(joins.at(i));
+                        map.joinedRels.push_back(rel.at(0));
+                        minMap=map;
+                    }
+                    else{
+                        map=tempMap;
+                        rel.push_back(this->rels.at(joinid2));
+                        map.cost += this->cost(joins.at(i), map.joinedRels, rel);
+                        map.joins.push_back(joins.at(i));
+                        map.joinedRels.push_back(rel.at(0));
+                        if(minMap.cost > map.cost){
                             minMap=map;
-                            // cout << "map join: " << map.joins.size() << " minmap join: " << minMap.joins.size() << endl;
                         }
-                        else{
-                            // cout << "normal" << endl;
-                            map=tempMap;
-                            rel.push_back(this->rels.at(joinid2));
-                            map.cost += this->cost(joins.at(i), map.joinedRels, rel);
-                            map.joins.push_back(joins.at(i));
-                            map.joinedRels.push_back(rel.at(0));
-                            if(minMap.cost > map.cost){
-                                minMap=map;
-                                // cout << "map join: " << map.joins.size() << " minmap join: " << minMap.joins.size() << endl;    
-                            }
-                        }
-                    // }
+                    }
                 }
             }    
         }
         cnt++;
-        // cout << cnt << "-------" << endl;
-        // cout << cnt << endl;
     }
-    //do this until new joins == old joins size
-    //for all joins 
-    //if join not in vector with joins and has a rel common at least
-    //add to new vector, compute cost
-
-    // cout << "mincost is: " << minMap.cost << " in size: " << minMap.joinedRels.size() << " " << cnt << endl;
-    
-    // cout << "joins: " << minMap.joins.at(0).index1 << "." <<minMap.joins.at(0).col1 << " = " << minMap.joins.at(0).index2 << "." <<minMap.joins.at(0).col2 << " -> " << minMap.joins.at(1).index1 << "." <<minMap.joins.at(1).col1 << " = " << minMap.joins.at(1).index2 << "." <<minMap.joins.at(1).col2 << endl;
-    // cout << "MinMap" << endl;
-    // for (int i=0; i<minMap.joins.size(); i++){
-        // cout << minMap.joins.at(i).index1 << "." <<minMap.joins.at(i).col1 << " = " << minMap.joins.at(i).index2 << "." <<minMap.joins.at(i).col2 << " -> ";
-    // }
-    // cout << endl << "Joins" << endl;
-    // for (int i=0; i<joins.size(); i++){
-        // cout << joins.at(i).index1 << "." <<joins.at(i).col1 << " = " << joins.at(i).index2 << "." <<joins.at(i).col2 << " -> ";
-    // }
-    // cout << endl;
+    joins=minMap.joins;
 }
 
 void Optimize::optimizeQuery(FileArray & fileArray, Parser & parser){
@@ -1108,21 +857,10 @@ void Optimize::optimizeQuery(FileArray & fileArray, Parser & parser){
             this->updateStats(parser.selfs);
         }
         //3. Rearange joins using map structure and update stats
-        // cout<<"optimizing.." << endl;
         this->optimizeJoins(parser.joins);
-        //4. return new parser.joins vector (or filters)
+        //4. return new parser.joins vector
         
     }
     //else do nothing
-     
-
-
-
-
-
-
-
-
-
     return;
 }
