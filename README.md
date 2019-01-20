@@ -7,9 +7,13 @@
 # Περιεχόμενα  
 - [Σύντομη Περιγραφή](https://github.com/babisboloudakis/DatabaseBridge#user-content-σύντομη-περιγραφή)
 - [Βελτιστοποίηση ερωτημάτων](https://github.com/babisboloudakis/DatabaseBridge#%CE%B2%CE%B5%CE%BB%CF%84%CE%B9%CF%83%CF%84%CE%BF%CF%80%CE%BF%CE%AF%CE%B7%CF%83%CE%B7-%CE%B5%CF%81%CF%89%CF%84%CE%B7%CE%BC%CE%AC%CF%84%CF%89%CE%BD)
+- [Παραλληλοποίηση](https://github.com/babisboloudakis/DatabaseBridge/blob/master/README.md#%CF%80%CE%B1%CF%81%CE%B1%CE%BB%CE%BB%CE%B7%CE%BB%CE%BF%CF%80%CE%BF%CE%AF%CE%B7%CF%83%CE%B7)
+- [Απόδοση/Χρόνος Εκτέλεσης](https://github.com/babisboloudakis/DatabaseBridge/blob/master/README.md#%CE%B1%CF%80%CF%8C%CE%B4%CE%BF%CF%83%CE%B7-%CF%84%CE%B7%CF%82-%CF%85%CE%BB%CE%BF%CF%80%CE%BF%CE%AF%CE%B7%CF%83%CE%B7%CF%82-%CE%BC%CE%B1%CF%82)
+- [Μορφή Ερωτημάτων](https://github.com/babisboloudakis/DatabaseBridge/blob/master/README.md#format-%CF%84%CF%89%CE%BD-%CE%B5%CF%81%CF%89%CF%84%CE%B7%CE%BC%CE%AC%CF%84%CF%89%CE%BD)
 - [Οδηγίες Εκτέλεσης](https://github.com/babisboloudakis/DatabaseBridge#%CE%BF%CE%B4%CE%B7%CE%B3%CE%AF%CE%B5%CF%82-%CE%B5%CE%BA%CF%84%CE%AD%CE%BB%CE%B5%CF%83%CE%B7%CF%82)
 - [Tests](https://github.com/babisboloudakis/DatabaseBridge#tests)
 - [Hash Functions](https://github.com/babisboloudakis/DatabaseBridge#hash-functions-%CF%84%CE%B7%CF%82-radix-hash-join)
+- [Ιδέες Για Βελτίωση](https://github.com/babisboloudakis/DatabaseBridge/blob/master/README.md#%CE%B9%CE%B4%CE%AD%CE%B5%CF%82-%CE%B3%CE%B9%CE%B1-%CF%80%CE%B5%CF%81%CE%B1%CE%B9%CF%84%CE%AD%CF%81%CF%89-%CE%B1%CE%BD%CE%AC%CF%80%CF%84%CF%85%CE%BE%CE%B7)
 
 # Σύντομη Περιγραφή
 Σκοπός του προγράμματος μας είναι η εκτέλεση της πράξης της σύζευξης (join) αλλά και του διάφορων φίλτρων (filter) πάνω
