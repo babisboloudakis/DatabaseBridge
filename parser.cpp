@@ -3,6 +3,8 @@
 using namespace std;
 
 static void splitString(string& line, vector<string>& result, const char delim) {
+    // Generic split string function used to break down query sections
+    // using given delimeters.
     stringstream ss(line);
     string token;
     while ( getline(ss,token,delim) ) {
@@ -47,10 +49,10 @@ SelectInfo Parser::parsePair ( string & rawPair ) {
     return SelectInfo( relations[stoul(words[0])] , stoul(words[1]), stoul(words[0]) );
 }
 
+// Determines if a given string is constant or not.
 inline static bool isConstant(string& raw) { return raw.find('.')==string::npos; }
 
 void Parser::parsePredicate(string& rawPredicate) {
-
     vector<string> preds;
     splitPredicates(rawPredicate, preds);
     // Read first pair.
@@ -71,7 +73,6 @@ void Parser::parsePredicate(string& rawPredicate) {
             joins.emplace_back( JoinInfo( left.rel, left.col, right.rel, right.col, left.index, right.index ) );
         }
     }
-
 }
 
 void Parser::parsePredicates( string & rawSelections ) {
@@ -99,12 +100,12 @@ void Parser::parseQuery( string & rawSelections ) {
     vector<string> words;
     // Split string into words
     splitString(rawSelections,words,'|');
-    
+    // Parse each query section.
     parseRelations(words[0]);
     parsePredicates(words[1]);
-    parseProjections(words[2]);
- 
+    parseProjections(words[2]); 
 }
+
 
 void Parser::printParseInfo() {
     // Print parse info for debugging purposes
@@ -112,22 +113,18 @@ void Parser::printParseInfo() {
     for ( int i = 0; i < relations.size(); i++ ) {
         cout << '\t' << relations[i] << endl;
     }
-
     cout << "Filters" << endl;
     for ( int i = 0; i < filters.size(); i++ ) {
         cout << '\t' << filters[i].rel << '\t' << filters[i].col << '\t' << (char)filters[i].op << '\t' << filters[i].constant << '\t' <<  filters[i].index <<  endl;
     }
-
     cout << "Joins" << endl;
     for ( int i = 0; i < joins.size(); i++ ) {
         cout << '\t' << joins[i].rel1 << '\t' << joins[i].col1 << '\t' << joins[i].rel2 << '\t' << joins[i].col2 << joins[i].index1 << '\t' << joins[i].index2 << endl;
     }
-
     cout << "Selfs" << endl;
     for (int i = 0; i < selfs.size(); i++) {
         cout << '\t' << selfs[i].rel << '\t' << selfs[i].col1 << '\t' << selfs[i].col2 << '\t' <<  selfs[i].index <<  endl;
     }
-
     cout << "Projections" << endl;
     for ( int i = 0; i < selections.size(); i++ ) {
         cout << '\t' << selections[i].rel << '\t' << selections[i].col << endl;

@@ -249,159 +249,6 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
     int offsetR = 0;
     int offsetS = 0;
 
-    // //for loop
-    // for (temp = 0; temp < buckets; temp++)
-    // {
-
-    //     //initialize bucket arrays
-    //     package *bucketR = new package[HistogramR[temp]];
-    //     package *bucketS = new package[HistogramS[temp]];
-
-    //     for (int i = 0; i < HistogramR[temp]; i++)
-    //     {
-    //         bucketR[i] = Rt[i + offsetR];
-    //     }
-    //     for (int i = 0; i < HistogramS[temp]; i++)
-    //     {
-    //         bucketS[i] = St[i + offsetS];
-    //     }
-    //     //initialize bucketArray
-    //     uint64_t *bucketArray = new uint64_t[PRIME];
-    //     for (int i = 0; i < PRIME; i++)
-    //     {
-    //         bucketArray[i] = 0;
-    //     }
-    //     uint64_t last;
-    //     //select smallest bucket
-    //     if (HistogramR[temp] <= HistogramS[temp])
-    //     {
-    //         uint64_t *chain = new uint64_t[HistogramR[temp]];
-    //         for (int i = 0; i < HistogramR[temp]; i++)
-    //         {
-    //             uint64_t bucket = HashFunction2(bucketR[i].payload); // bucket for that payload
-    //             last = bucketArray[bucket];
-    //             bucketArray[bucket] = i + 1;
-    //             chain[i] = last;
-    //         }
-    //         //go to other bucket
-    //         for (int i = 0; i < HistogramS[temp]; i++)
-    //         {
-    //             uint64_t bucket = HashFunction2(bucketS[i].payload); // bucket for that payload
-    //             if ((last = bucketArray[bucket]) != 0)
-    //             { //if there is a hash
-    //                 if (bucketR[last - 1].payload == bucketS[i].payload)
-    //                 { //if there is a match
-    //                     //add to result
-    //                     int ind1 = bucketR[last - 1].index;
-    //                     int ind2 = bucketS[i].index;
-    //                     for (int k = 0; k < joinedMid->rels->size(); k++)
-    //                     {
-    //                         if (k < results1.rels->size())
-    //                         {
-    //                             joinedMid->res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
-    //                         }
-    //                         else
-    //                         {
-    //                             joinedMid->res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
-    //                         }
-    //                     }
-    //                 }
-    //                 //go to next
-    //                 while (chain[last - 1] != 0)
-    //                 {
-    //                     last = chain[last - 1];
-    //                     if (bucketR[last - 1].payload == bucketS[i].payload)
-    //                     {
-    //                         //add to result
-    //                         int ind1 = bucketR[last - 1].index;
-    //                         int ind2 = bucketS[i].index;
-    //                         for (int k = 0; k < joinedMid->rels->size(); k++)
-    //                         {
-    //                             if (k < results1.rels->size())
-    //                             {
-    //                                 joinedMid->res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
-    //                             }
-    //                             else
-    //                             {
-    //                                 joinedMid->res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
-    //                             }
-    //                         }
-    //                         // delete result;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         delete chain;
-    //     }
-    //     else
-    //     {
-    //         uint64_t *chain = new uint64_t[HistogramS[temp]];
-    //         for (int i = 0; i < HistogramS[temp]; i++)
-    //         {
-    //             uint64_t bucket = HashFunction2(bucketS[i].payload); // bucket for that payload
-    //             uint64_t last = bucketArray[bucket];
-    //             bucketArray[bucket] = i + 1;
-    //             chain[i] = last;
-    //         }
-    //         //go to other bucket
-    //         for (int i = 0; i < HistogramR[temp]; i++)
-    //         {
-    //             uint64_t bucket = HashFunction2(bucketR[i].payload); // bucket for that payload
-    //             if ((last = bucketArray[bucket]) != 0)
-    //             { //if there is a hash
-    //                 if (bucketS[last - 1].payload == bucketR[i].payload)
-    //                 { //if there is a match
-    //                     //add to result
-    //                     int ind1 = bucketR[i].index;
-    //                     int ind2 = bucketS[last - 1].index;
-    //                     for (int k = 0; k < joinedMid->rels->size(); k++)
-    //                     {
-    //                         if (k < results1.rels->size())
-    //                         {
-    //                             joinedMid->res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
-    //                         }
-    //                         else
-    //                         {
-    //                             joinedMid->res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
-    //                         }
-    //                     }
-    //                 }
-    //                 //go to next
-    //                 while (chain[last - 1] != 0)
-    //                 {
-    //                     last = chain[last - 1];
-    //                     if (bucketS[last - 1].payload == bucketR[i].payload)
-    //                     {
-    //                         //add to result
-    //                         int ind1 = bucketR[i].index;
-    //                         int ind2 = bucketS[last - 1].index;
-    //                         for (int k = 0; k < joinedMid->rels->size(); k++)
-    //                         {
-    //                             if (k < results1.rels->size())
-    //                             {
-    //                                 joinedMid->res->at(k).rowIds->push_back(results1.res->at(k).rowIds->at(ind1));
-    //                             }
-    //                             else
-    //                             {
-    //                                 joinedMid->res->at(k).rowIds->push_back(results2.res->at(k - results1.rels->size()).rowIds->at(ind2));
-    //                             }
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         delete chain;
-    //     }
-    //     offsetR = offsetR + HistogramR[temp];
-    //     offsetS = offsetS + HistogramS[temp];
-    //     delete bucketArray;
-    //     delete bucketS;
-    //     delete bucketR;
-    // }
-
-
-    //------------------------
-
     scheduler.barrierInit(buckets);
     
     // New vector with results after joining
@@ -473,13 +320,6 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
         {
             bucketS[i] = St[i + offsetS];
         }
-        // //initialize bucketArray
-        // uint64_t *bucketArray = new uint64_t[PRIME];
-        // for (int i = 0; i < PRIME; i++)
-        // {
-        //     bucketArray[i] = 0;
-        // }
-
         // THREADS HERE
         scheduler.schedule( new JoinJob(HistogramR, HistogramS, bucketR, bucketS, threadResults[bucketIndex], results1, results2, bucketIndex ) );
         offsetR = offsetR + HistogramR[bucketIndex];
@@ -525,7 +365,6 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
     // Delete of final arrays
     delete Rt;
     delete St;
-
     // Delete of previous rowId vectors
     delete results1.rels;
     delete results1.indexs;
@@ -541,11 +380,9 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
         delete results2.res->at(i).rowIds;
     }
     delete results2.res;
-
     delete values1;
     delete values2;
-
-
+    // Delete thread join results
     for ( int i = 0; i < buckets; i++ ) {
         delete threadResults[i].rels;
         delete threadResults[i].indexs;
@@ -564,8 +401,9 @@ MidResult *Join::join(MidResult &results1, MidResult &results2, JoinInfo &join, 
 
 
 void Join::join(MidResult & results, JoinInfo & join, FileArray & fileArray ){
-    int index1;
-    int index2;
+    // Join used for self joins.
+    // For example 0.1 = 0.2
+    int index1, index2;
     vector<uint64_t> * val1, *val2;
     if((join.index1 == join.index2) && (join.col1 == join.col2)){
         return;

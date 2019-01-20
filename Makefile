@@ -1,18 +1,11 @@
-SOURCES = main.cpp read.cpp query.cpp parser.cpp filter.cpp optimize.cpp join.cpp scheduler.cpp
 OBJ = main.o read.o query.o parser.o filter.o optimize.o join.o scheduler.o
 PARAMS = -std=c++11 -lpthread -O3
 
 default: $(OBJ)
 	@g++ $(OBJ) -o main $(PARAMS)
-	
-run: default
-	@./main
 
-small: default
-	@time ./main < input.txt
-
-test: default
-	@./main < test.txt
+harness:
+	@g++ -o harness harness.cpp -std=c++11
 
 main.o: main.cpp
 	@g++ -c main.cpp $(PARAMS)
@@ -37,9 +30,6 @@ join.o: join.cpp ./headers/join.hpp
 
 scheduler.o: scheduler.cpp ./headers/scheduler.hpp
 	@g++ -c scheduler.cpp -pthread $(PARAMS)
-
-sche: 
-	g++ -o thread scheduler.cpp -std=c++11 
 
 clean:
 	@rm -f *.o ./main

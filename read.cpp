@@ -61,8 +61,6 @@ vector<uint64_t> * Cell::findColByRowIds (vector<uint64_t> &rowId, uint64_t col)
     return p;
 }
 
-
-
 uint64_t * Cell::getColPtr (uint64_t col){
     return this->array[col].pointer;
 }

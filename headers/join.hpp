@@ -13,7 +13,7 @@
 #include "read.hpp"
 #endif
 
-#define PRIME 13 // prime number used in HashFunction2 
+#define PRIME 499 // prime number used in HashFunction2 
 
 /** Type definition for a tuple */
 typedef struct package {
