@@ -43,6 +43,13 @@ typedef struct MapData {
     vector<JoinInfo> joins;
     vector<RelInfo> joinedRels;
     uint64_t cost;
+
+    inline MapData operator=(MapData a) {
+        joins=a.joins;
+        joinedRels=a.joinedRels;
+        cost=a.cost;
+        return a;
+    }
 } MapData;
 
 
@@ -50,9 +57,7 @@ class Optimize{
     public:
 
     int relcnt;
-    vector<RelInfo> rels;
-    // vector<SelfInfo> * selfJoin;
-    vector<MapData> map;  
+    vector<RelInfo> rels;  
 
     Optimize(){
         this->relcnt = 0;
@@ -72,7 +77,7 @@ class Optimize{
 
     uint64_t cost(JoinInfo & join, RelInfo & rels1, RelInfo & rels2);
     
-    uint64_t cost(SelfInfo & join, vector<RelInfo> & rels);
+    uint64_t cost(JoinInfo & join, vector<RelInfo> & rels);
 
     uint64_t cost(SelfInfo & join, RelInfo & relIn);
 
